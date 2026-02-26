@@ -25,9 +25,7 @@ export default function AboutPage() {
       <section className="bg-gray-950 text-white py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold">{t("title")}</h1>
-          <p className="mt-4 text-gray-400 text-lg max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
+          <p className="mt-4 text-gray-400 text-lg max-w-2xl mx-auto">{t("subtitle")}</p>
         </div>
       </section>
 
@@ -38,13 +36,9 @@ export default function AboutPage() {
             <div>
               <div className="flex items-center space-x-3 mb-6">
                 <Calendar size={24} className="text-yellow-500" />
-                <h2 className="text-3xl font-bold text-gray-900">
-                  {t("history_title")}
-                </h2>
+                <h2 className="text-3xl font-bold text-gray-900">{t("history_title")}</h2>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed">
-                {t("history_text")}
-              </p>
+              <p className="text-gray-600 text-lg leading-relaxed">{t("history_text")}</p>
             </div>
             <div className="bg-gray-100 rounded-2xl p-12 text-center">
               <div className="text-6xl font-bold text-yellow-500">2019</div>
@@ -69,20 +63,12 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="bg-white border border-gray-200 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                {t("mission_title")}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t("mission_text")}
-              </p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("mission_title")}</h3>
+              <p className="text-gray-600 leading-relaxed">{t("mission_text")}</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                {t("vision_title")}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">
-                {t("vision_text")}
-              </p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">{t("vision_title")}</h3>
+              <p className="text-gray-600 leading-relaxed">{t("vision_text")}</p>
             </div>
           </div>
         </div>
@@ -100,9 +86,7 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Icon size={32} className="text-yellow-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  {t(titleKey)}
-                </h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t(titleKey)}</h3>
                 <p className="text-gray-600">{t(textKey)}</p>
               </div>
             ))}
@@ -114,9 +98,7 @@ export default function AboutPage() {
       <section className="py-20 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-              {t("team_title")}
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("team_title")}</h2>
             <p className="mt-4 text-gray-600 text-lg">{t("team_subtitle")}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

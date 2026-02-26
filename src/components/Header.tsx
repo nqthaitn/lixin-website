@@ -104,9 +104,7 @@ export default function Header() {
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={`block py-3 text-base font-medium transition-colors ${
-                  pathname === link.href
-                    ? "text-yellow-500"
-                    : "text-gray-300 hover:text-yellow-500"
+                  pathname === link.href ? "text-yellow-500" : "text-gray-300 hover:text-yellow-500"
                 }`}
               >
                 {link.label}
