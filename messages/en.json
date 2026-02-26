@@ -148,6 +148,7 @@
     "label_address": "Address",
     "label_phone": "Phone / Zalo",
     "label_email": "Email",
-    "open_in_maps": "Open in Google Maps"
+    "open_in_maps": "Open in Google Maps",
+    "submitting": "Submitting..."
   }
 }

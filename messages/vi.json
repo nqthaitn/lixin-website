@@ -148,6 +148,7 @@
     "label_address": "Địa chỉ",
     "label_phone": "Điện thoại / Zalo",
     "label_email": "Email",
-    "open_in_maps": "Mở trong Google Maps"
+    "open_in_maps": "Mở trong Google Maps",
+    "submitting": "Đang gửi..."
   }
 }

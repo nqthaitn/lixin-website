@@ -19,23 +19,44 @@ export default function ContactPage() {
     notes: "",
   });
 
+  const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowSuccess(true);
-    // Reset form
-    setFormData({
-      name: "",
-      phone: "",
-      email: "",
-      service: "",
-      date: "",
-      time: "",
-      notes: "",
-    });
-    // Hide toast after 5s
-    setTimeout(() => setShowSuccess(false), 5000);
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setSubmitError(data.error || "Có lỗi xảy ra, vui lòng thử lại");
+        return;
+      }
+
+      setShowSuccess(true);
+      setFormData({
+        name: "",
+        phone: "",
+        email: "",
+        service: "",
+        date: "",
+        time: "",
+        notes: "",
+      });
+      setTimeout(() => setShowSuccess(false), 5000);
+    } catch {
+      setSubmitError("Lỗi kết nối, vui lòng thử lại");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -138,6 +159,12 @@ export default function ContactPage() {
             {showSuccess && (
               <div className="mb-6 p-4 bg-green-50 text-green-800 rounded-lg border border-green-200 font-medium">
                 {t("success")}
+              </div>
+            )}
+
+            {submitError && (
+              <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg border border-red-200 font-medium">
+                {submitError}
               </div>
             )}
 
@@ -261,9 +288,10 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 transition-colors"
+                disabled={submitting}
+                className="w-full bg-yellow-500 text-black font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {t("submit")}
+                {submitting ? t("submitting") : t("submit")}
               </button>
             </form>
           </div>
