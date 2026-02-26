@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Award, Eye, Heart, Calendar, Users } from "lucide-react";
+import { Award, Eye, Heart, Calendar } from "lucide-react";
 
 export default function AboutPage() {
   const t = useTranslations("about");
@@ -10,13 +10,6 @@ export default function AboutPage() {
     { icon: Award, titleKey: "value_1_title", textKey: "value_1_text" },
     { icon: Eye, titleKey: "value_2_title", textKey: "value_2_text" },
     { icon: Heart, titleKey: "value_3_title", textKey: "value_3_text" },
-  ];
-
-  const team = [
-    { name: "Nguyễn Văn A", role: "Giám đốc điều hành" },
-    { name: "Lý Minh B", role: "Chuyên gia thuế" },
-    { name: "Trần Thị C", role: "Kế toán trưởng" },
-    { name: "王大明", role: "Tư vấn đầu tư" },
   ];
 
   return (
@@ -94,7 +87,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
+      {/* Team - TODO: unhide when real team data is ready */}
+      {/*
       <section className="py-20 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -117,6 +111,7 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      */}
     </div>
   );
 }
