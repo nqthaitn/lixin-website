@@ -104,12 +104,30 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Map Placeholder */}
+            {/* Google Maps */}
             <div>
               <h3 className="font-semibold text-gray-900 text-lg mb-4">{t("map_title")}</h3>
-              <div className="w-full h-[300px] bg-gray-200 rounded-xl flex items-center justify-center">
-                <span className="text-gray-500">Google Maps Embed Placeholder</span>
+              <div className="w-full h-[300px] rounded-xl overflow-hidden border border-gray-200">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d106.3074665!3d11.1549997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x310b3b188ab57045%3A0x4512fa529b71fdd0!2zQ8O0bmcgVHkgVE5ISCBE4buLY2ggVuG7pSB2w6AgVMawIFbhuqVuIExJWElO!5e0!3m2!1svi!2s!4v1700000000000"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Lixin VN Location"
+                />
               </div>
+              <a
+                href="https://maps.app.goo.gl/3KBZzsisuxKKapFq8"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-3 text-sm text-yellow-600 hover:text-yellow-500 font-medium transition-colors"
+              >
+                <MapPin size={14} />
+                {t("open_in_maps")}
+              </a>
             </div>
           </div>
 

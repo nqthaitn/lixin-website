@@ -13,3 +13,122 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* Hero bar chart animation */
+@keyframes growUp {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+/* Floating card animation */
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* TipTap Editor Styles */
+.tiptap {
+  outline: none;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.tiptap img.ProseMirror-selectednode {
+  outline: 3px solid #eab308;
+}
+
+.tiptap blockquote {
+  border-left: 3px solid #eab308;
+  padding-left: 1rem;
+  color: #6b7280;
+  margin: 1rem 0;
+}
+
+.tiptap hr {
+  border-color: #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+.tiptap a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+/* News detail rendered HTML */
+.news-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+}
+.news-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+}
+.news-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+}
+.news-content p {
+  margin: 0.75rem 0;
+  line-height: 1.75;
+}
+.news-content ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.news-content ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+.news-content li {
+  margin: 0.25rem 0;
+}
+.news-content blockquote {
+  border-left: 3px solid #eab308;
+  padding-left: 1rem;
+  color: #6b7280;
+  margin: 1rem 0;
+  font-style: italic;
+}
+.news-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+.news-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.news-content hr {
+  border-color: #e5e7eb;
+  margin: 1.5rem 0;
+}

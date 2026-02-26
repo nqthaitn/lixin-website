@@ -28,15 +28,16 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className="scroll-smooth">
-      <body className={`${inter.className} bg-white text-gray-900 antialiased`}>
-        <NextIntlClientProvider messages={messages}>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-          <ZaloChat />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <div
+      lang={locale}
+      className={`${inter.className} bg-white text-gray-900 antialiased scroll-smooth`}
+    >
+      <NextIntlClientProvider messages={messages}>
+        <Header />
+        <main className="min-h-screen">{children}</main>
+        <Footer />
+        <ZaloChat />
+      </NextIntlClientProvider>
+    </div>
   );
 }

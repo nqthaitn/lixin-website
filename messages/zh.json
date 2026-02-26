@@ -24,7 +24,15 @@
     "news_more": "查看所有新闻",
     "cta_title": "需要咨询？",
     "cta_subtitle": "力信专家团队随时为您服务。立即预约免费咨询。",
-    "cta_button": "立即预约"
+    "cta_button": "立即预约",
+    "why_title": "为什么选择",
+    "why_subtitle": "我们的与众不同来自专业的工作流程、深入的技术应用和丰富的经验。",
+    "why_feature_1_title": "绝对精确",
+    "why_feature_1_desc": "应用先进技术，最大限度减少所有业务中的错误。",
+    "why_feature_2_title": "信息安全",
+    "why_feature_2_desc": "您的商业数据始终被加密并受到严格保护。",
+    "why_feature_3_title": "24/7支持",
+    "why_feature_3_desc": "立即解答疑问和处理突发问题。"
   },
   "about": {
     "title": "关于力信越南",
@@ -105,7 +113,12 @@
     "placeholder_title_5": "5个常见税务申报错误及解决方法",
     "placeholder_excerpt_5": "企业在税务申报中应避免的常见错误...",
     "placeholder_title_6": "免费研讨会：中小企业会计成本优化",
-    "placeholder_excerpt_6": "力信越南举办研讨会，指导中小企业..."
+    "placeholder_excerpt_6": "力信越南举办研讨会，指导中小企业...",
+    "loading": "加载中...",
+    "not_found": "未找到文章",
+    "back_to_list": "返回列表",
+    "no_content": "暂无内容。",
+    "read_more": "查看详情"
   },
   "contact": {
     "title": "联系我们",
@@ -134,6 +147,7 @@
     "map_title": "地图",
     "label_address": "地址",
     "label_phone": "电话 / Zalo",
-    "label_email": "电子邮件"
+    "label_email": "电子邮件",
+    "open_in_maps": "在Google地图中打开"
   }
 }

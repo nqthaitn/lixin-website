@@ -24,7 +24,15 @@
     "news_more": "Xem tất cả tin tức",
     "cta_title": "Bạn cần tư vấn?",
     "cta_subtitle": "Đội ngũ chuyên gia của Lixin sẵn sàng hỗ trợ bạn. Đặt lịch tư vấn miễn phí ngay hôm nay.",
-    "cta_button": "Đặt lịch ngay"
+    "cta_button": "Đặt lịch ngay",
+    "why_title": "Tại sao chọn",
+    "why_subtitle": "Sự khác biệt của chúng tôi đến từ quy trình làm việc chuyên nghiệp, ứng dụng sâu công nghệ và sự am hiểu.",
+    "why_feature_1_title": "Chính xác tuyệt đối",
+    "why_feature_1_desc": "Áp dụng công nghệ tiên tiến, hạn chế tối đa sai sót trong mọi nghiệp vụ.",
+    "why_feature_2_title": "Bảo mật thông tin",
+    "why_feature_2_desc": "Mọi dữ liệu kinh doanh của bạn luôn được mã hóa và bảo vệ nghiêm ngặt.",
+    "why_feature_3_title": "Hỗ trợ 24/7",
+    "why_feature_3_desc": "Giải đáp thắc mắc và xử lý các vấn đề phát sinh ngay lập tức."
   },
   "about": {
     "title": "Về Lixin Việt Nam",
@@ -105,7 +113,12 @@
     "placeholder_title_5": "5 lỗi kê khai thuế thường gặp và cách khắc phục",
     "placeholder_excerpt_5": "Những sai sót phổ biến khi kê khai thuế mà doanh nghiệp cần tránh...",
     "placeholder_title_6": "Hội thảo miễn phí: Tối ưu chi phí kế toán cho SME",
-    "placeholder_excerpt_6": "Lixin VN tổ chức hội thảo hướng dẫn doanh nghiệp nhỏ và vừa..."
+    "placeholder_excerpt_6": "Lixin VN tổ chức hội thảo hướng dẫn doanh nghiệp nhỏ và vừa...",
+    "loading": "Đang tải...",
+    "not_found": "Không tìm thấy bài viết",
+    "back_to_list": "Quay lại danh sách",
+    "no_content": "Chưa có nội dung.",
+    "read_more": "Xem chi tiết"
   },
   "contact": {
     "title": "Liên hệ",
@@ -134,6 +147,7 @@
     "map_title": "Bản đồ",
     "label_address": "Địa chỉ",
     "label_phone": "Điện thoại / Zalo",
-    "label_email": "Email"
+    "label_email": "Email",
+    "open_in_maps": "Mở trong Google Maps"
   }
 }

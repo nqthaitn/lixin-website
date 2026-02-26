@@ -24,7 +24,15 @@
     "news_more": "View all news",
     "cta_title": "Need Consultation?",
     "cta_subtitle": "Our expert team at Lixin is ready to assist you. Book a free consultation today.",
-    "cta_button": "Book Now"
+    "cta_button": "Book Now",
+    "why_title": "Why choose",
+    "why_subtitle": "Our difference comes from professional workflows, deep technology application and expertise.",
+    "why_feature_1_title": "Absolute Accuracy",
+    "why_feature_1_desc": "Applying advanced technology to minimize errors in all operations.",
+    "why_feature_2_title": "Data Security",
+    "why_feature_2_desc": "Your business data is always encrypted and strictly protected.",
+    "why_feature_3_title": "24/7 Support",
+    "why_feature_3_desc": "Answering questions and handling issues immediately."
   },
   "about": {
     "title": "About Lixin Vietnam",
@@ -93,7 +101,7 @@
     "category_accounting": "Accounting",
     "category_law": "Law",
     "category_business": "Business",
-    "no_news": "No news available.",
+    "no_news": "No news yet.",
     "placeholder_title_1": "New Tax Policies for FDI Enterprises in 2026",
     "placeholder_excerpt_1": "The Ministry of Finance has just issued a new circular on tax incentive policies...",
     "placeholder_title_2": "PIT Settlement Guide for 2025",
@@ -105,7 +113,12 @@
     "placeholder_title_5": "5 Common Tax Declaration Errors and How to Fix Them",
     "placeholder_excerpt_5": "Common mistakes in tax declaration that businesses should avoid...",
     "placeholder_title_6": "Free Workshop: Optimizing Accounting Costs for SMEs",
-    "placeholder_excerpt_6": "Lixin VN organizes a workshop guiding small and medium enterprises..."
+    "placeholder_excerpt_6": "Lixin VN organizes a workshop guiding small and medium enterprises...",
+    "loading": "Loading...",
+    "not_found": "Article not found",
+    "back_to_list": "Back to list",
+    "no_content": "No content available.",
+    "read_more": "Read more"
   },
   "contact": {
     "title": "Contact Us",
@@ -134,6 +147,7 @@
     "map_title": "Map",
     "label_address": "Address",
     "label_phone": "Phone / Zalo",
-    "label_email": "Email"
+    "label_email": "Email",
+    "open_in_maps": "Open in Google Maps"
   }
 }

@@ -1,54 +1,51 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useEffect, useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { Link } from "@/i18n/routing";
+import { News } from "@/types/news";
+import { ArrowRight } from "lucide-react";
+
+const CATEGORY_LABELS: Record<string, Record<string, string>> = {
+  vi: {
+    tax: "Thuế",
+    accounting: "Kế toán",
+    legal: "Pháp lý",
+    business: "Doanh nghiệp",
+    other: "Khác",
+  },
+  en: {
+    tax: "Tax",
+    accounting: "Accounting",
+    legal: "Legal",
+    business: "Business",
+    other: "Other",
+  },
+  zh: { tax: "税务", accounting: "会计", legal: "法律", business: "商业", other: "其他" },
+};
 
 export default function NewsPage() {
   const t = useTranslations("news");
+  const locale = useLocale();
+  const [news, setNews] = useState<News[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const newsItems = [
-    {
-      id: 1,
-      date: "2026-02-20",
-      category: t("category_tax"),
-      titleKey: "placeholder_title_1",
-      excerptKey: "placeholder_excerpt_1",
-    },
-    {
-      id: 2,
-      date: "2026-02-18",
-      category: t("category_accounting"),
-      titleKey: "placeholder_title_2",
-      excerptKey: "placeholder_excerpt_2",
-    },
-    {
-      id: 3,
-      date: "2026-02-15",
-      category: t("category_business"),
-      titleKey: "placeholder_title_3",
-      excerptKey: "placeholder_excerpt_3",
-    },
-    {
-      id: 4,
-      date: "2026-02-10",
-      category: t("category_law"),
-      titleKey: "placeholder_title_4",
-      excerptKey: "placeholder_excerpt_4",
-    },
-    {
-      id: 5,
-      date: "2026-02-05",
-      category: t("category_tax"),
-      titleKey: "placeholder_title_5",
-      excerptKey: "placeholder_excerpt_5",
-    },
-    {
-      id: 6,
-      date: "2026-02-01",
-      category: t("category_accounting"),
-      titleKey: "placeholder_title_6",
-      excerptKey: "placeholder_excerpt_6",
-    },
-  ];
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await fetch("/api/news?status=published&limit=20");
+        if (res.ok) {
+          const data = await res.json();
+          setNews(data.data || []);
+        }
+      } catch {
+        console.error("Failed to fetch news");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
 
   return (
     <div className="pt-16 pb-20">
@@ -62,64 +59,69 @@ export default function NewsPage() {
 
       {/* News Grid */}
       <section className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {newsItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              {/* Thumbnail Placeholder */}
-              <div className="w-full h-[200px] bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-400">Image Placeholder</span>
-              </div>
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">{t("loading")}</div>
+        ) : news.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">{t("no_news")}</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {news.map((item) => {
+              const title =
+                (item as unknown as Record<string, string>)[`title_${locale}`] || item.title_vi;
+              const excerpt =
+                (item as unknown as Record<string, string>)[`excerpt_${locale}`] || item.excerpt_vi;
+              const categoryLabel = CATEGORY_LABELS[locale]?.[item.category] || item.category;
 
-              <div className="p-6">
-                <div className="flex items-center space-x-4 mb-4">
-                  <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                    {item.category}
-                  </span>
-                  <span className="text-sm text-gray-500">{item.date}</span>
-                </div>
+              return (
+                <Link
+                  key={item.id}
+                  href={`/news/${item.id}` as "/news"}
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow group"
+                >
+                  {/* Thumbnail */}
+                  {item.cover_image ? (
+                    <div className="w-full h-[200px] overflow-hidden">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.cover_image}
+                        alt={title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full h-[200px] bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                      <span className="text-gray-400 text-4xl">📰</span>
+                    </div>
+                  )}
 
-                <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {t(item.titleKey as any)}
-                </h3>
+                  <div className="p-6">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                        {categoryLabel}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(item.created_at).toLocaleDateString(
+                          locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN"
+                        )}
+                      </span>
+                    </div>
 
-                <p className="text-gray-600 mb-4 line-clamp-3">
-                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                  {t(item.excerptKey as any)}
-                </p>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                      {title}
+                    </h3>
 
-                <button className="text-yellow-600 font-semibold hover:text-yellow-700 transition-colors">
-                  Read More →
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                    <p className="text-gray-600 mb-4 line-clamp-3">{excerpt}</p>
 
-        {/* Pagination Placeholder */}
-        <div className="mt-12 flex justify-center space-x-2">
-          <button
-            disabled
-            className="px-4 py-2 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
-          >
-            Previous
-          </button>
-          <button
-            disabled
-            className="px-4 py-2 bg-yellow-500 text-black font-semibold rounded-lg cursor-not-allowed"
-          >
-            1
-          </button>
-          <button
-            disabled
-            className="px-4 py-2 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
+                    <span className="inline-flex items-center text-yellow-600 font-semibold group-hover:text-yellow-500 transition-colors">
+                      {t("read_more")}
+                      <ArrowRight className="ml-1" size={16} />
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </section>
     </div>
   );
