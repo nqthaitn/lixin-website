@@ -131,6 +131,9 @@
     "notes_placeholder": "简要描述您的需求...",
     "submit": "提交请求",
     "success": "提交成功！我们将尽快与您联系。",
-    "map_title": "地图"
+    "map_title": "地图",
+    "label_address": "地址",
+    "label_phone": "电话 / Zalo",
+    "label_email": "电子邮件"
   }
 }

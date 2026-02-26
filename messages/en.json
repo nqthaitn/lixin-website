@@ -131,6 +131,9 @@
     "notes_placeholder": "Briefly describe your needs...",
     "submit": "Submit Request",
     "success": "Submitted successfully! We will contact you shortly.",
-    "map_title": "Map"
+    "map_title": "Map",
+    "label_address": "Address",
+    "label_phone": "Phone / Zalo",
+    "label_email": "Email"
   }
 }

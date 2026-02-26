@@ -7,6 +7,7 @@ import { MapPin, Phone, Mail } from "lucide-react";
 export default function ContactPage() {
   const t = useTranslations("contact");
   const tServices = useTranslations("services");
+  const tFooter = useTranslations("footer");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -77,8 +78,8 @@ export default function ContactPage() {
                   <MapPin size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg mb-1">Địa chỉ</h3>
-                  <p className="text-gray-600">Số 2, Tổ 4, Ấp 4, xã Truông Mít, Tỉnh Tây Ninh</p>
+                  <h3 className="font-semibold text-gray-900 text-lg mb-1">{t("label_address")}</h3>
+                  <p className="text-gray-600">{tFooter("address")}</p>
                 </div>
               </div>
 
@@ -87,7 +88,7 @@ export default function ContactPage() {
                   <Phone size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg mb-1">Điện thoại / Zalo</h3>
+                  <h3 className="font-semibold text-gray-900 text-lg mb-1">{t("label_phone")}</h3>
                   <p className="text-gray-600">0395536768</p>
                 </div>
               </div>
@@ -97,7 +98,7 @@ export default function ContactPage() {
                   <Mail size={24} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg mb-1">Email</h3>
+                  <h3 className="font-semibold text-gray-900 text-lg mb-1">{t("label_email")}</h3>
                   <p className="text-gray-600">lixinvn.co.ltd@gmail.com</p>
                 </div>
               </div>

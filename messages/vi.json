@@ -131,6 +131,9 @@
     "notes_placeholder": "Mô tả ngắn nhu cầu của bạn...",
     "submit": "Gửi yêu cầu",
     "success": "Gửi thành công! Chúng tôi sẽ liên hệ bạn sớm nhất.",
-    "map_title": "Bản đồ"
+    "map_title": "Bản đồ",
+    "label_address": "Địa chỉ",
+    "label_phone": "Điện thoại / Zalo",
+    "label_email": "Email"
   }
 }
