@@ -19,6 +19,7 @@ body {
   from {
     transform: scaleY(0);
   }
+
   to {
     transform: scaleY(1);
   }
@@ -29,9 +30,11 @@ body {
   0% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-20px);
   }
+
   100% {
     transform: translateY(0);
   }
@@ -42,12 +45,87 @@ body {
   outline: none;
 }
 
+.tiptap .selectedCell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(234, 179, 8, 0.15);
+  pointer-events: none;
+}
+
+.tiptap .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: #eab308;
+  pointer-events: none;
+}
+
+.tiptap th,
+.tiptap td {
+  position: relative;
+}
+
 .tiptap p.is-editor-empty:first-child::before {
   color: #adb5bd;
   content: attr(data-placeholder);
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+.tiptap h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.75rem;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.tiptap h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 1.25rem 0 0.5rem;
+  line-height: 1.3;
+  color: #111827;
+}
+
+.tiptap h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  line-height: 1.4;
+  color: #111827;
+}
+
+.tiptap p {
+  margin: 0.75rem 0;
+  line-height: 1.75;
+}
+
+.tiptap ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.tiptap ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+  margin: 0.75rem 0;
+}
+
+.tiptap li {
+  margin: 0.25rem 0;
+}
+
+.tiptap li p {
+  margin: 0;
 }
 
 .tiptap img {
@@ -66,6 +144,7 @@ body {
   padding-left: 1rem;
   color: #6b7280;
   margin: 1rem 0;
+  font-style: italic;
 }
 
 .tiptap hr {
@@ -78,39 +157,74 @@ body {
   text-decoration: underline;
 }
 
+.tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.tiptap th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.tiptap td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.tiptap tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
 /* News detail rendered HTML */
 .news-content h1 {
   font-size: 2rem;
   font-weight: 700;
   margin: 1.5rem 0 0.75rem;
 }
+
 .news-content h2 {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 1.25rem 0 0.5rem;
 }
+
 .news-content h3 {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 1rem 0 0.5rem;
 }
+
 .news-content p {
   margin: 0.75rem 0;
   line-height: 1.75;
 }
+
 .news-content ul {
   list-style: disc;
   padding-left: 1.5rem;
   margin: 0.75rem 0;
 }
+
 .news-content ol {
   list-style: decimal;
   padding-left: 1.5rem;
   margin: 0.75rem 0;
 }
+
 .news-content li {
   margin: 0.25rem 0;
 }
+
 .news-content blockquote {
   border-left: 3px solid #eab308;
   padding-left: 1rem;
@@ -118,17 +232,48 @@ body {
   margin: 1rem 0;
   font-style: italic;
 }
+
 .news-content img {
   max-width: 100%;
   height: auto;
   border-radius: 0.5rem;
   margin: 1rem 0;
 }
+
 .news-content a {
   color: #2563eb;
   text-decoration: underline;
 }
+
 .news-content hr {
   border-color: #e5e7eb;
   margin: 1.5rem 0;
+}
+
+.news-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.news-content th {
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #111827;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.news-content td {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e5e7eb;
+  vertical-align: top;
+}
+
+.news-content tr:nth-child(even) {
+  background-color: #f9fafb;
 }

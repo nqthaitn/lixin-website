@@ -7,6 +7,10 @@ import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import { useCallback } from "react";
 import {
   Bold,
@@ -28,6 +32,9 @@ import {
   Redo,
   Quote,
   Minus,
+  TableIcon,
+  Plus,
+  Trash2,
 } from "lucide-react";
 
 function ToolBtn({
@@ -80,6 +87,15 @@ export default function RichEditor({
       Underline,
       Link.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: "tiptap-table",
+        },
+      }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content,
     immediatelyRender: false,
@@ -113,7 +129,14 @@ export default function RichEditor({
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
   }, [editor]);
 
+  const insertTable = useCallback(() => {
+    if (!editor) return;
+    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  }, [editor]);
+
   if (!editor) return null;
+
+  const isInTable = editor.isActive("table");
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-yellow-500 focus-within:border-yellow-500">
@@ -250,6 +273,47 @@ export default function RichEditor({
         >
           <Minus size={16} />
         </ToolBtn>
+
+        <Divider />
+
+        <ToolBtn onClick={insertTable} active={isInTable} title="Chèn bảng 3x3">
+          <TableIcon size={16} />
+        </ToolBtn>
+
+        {isInTable && (
+          <>
+            <ToolBtn onClick={() => editor.chain().focus().addColumnAfter().run()} title="Thêm cột">
+              <span className="flex items-center text-xs font-medium gap-0.5">
+                <Plus size={10} />
+                Cột
+              </span>
+            </ToolBtn>
+            <ToolBtn onClick={() => editor.chain().focus().addRowAfter().run()} title="Thêm hàng">
+              <span className="flex items-center text-xs font-medium gap-0.5">
+                <Plus size={10} />
+                Hàng
+              </span>
+            </ToolBtn>
+            <ToolBtn onClick={() => editor.chain().focus().deleteColumn().run()} title="Xóa cột">
+              <span className="flex items-center text-xs font-medium text-red-500 gap-0.5">
+                <Trash2 size={10} />
+                Cột
+              </span>
+            </ToolBtn>
+            <ToolBtn onClick={() => editor.chain().focus().deleteRow().run()} title="Xóa hàng">
+              <span className="flex items-center text-xs font-medium text-red-500 gap-0.5">
+                <Trash2 size={10} />
+                Hàng
+              </span>
+            </ToolBtn>
+            <ToolBtn onClick={() => editor.chain().focus().deleteTable().run()} title="Xóa bảng">
+              <span className="flex items-center text-xs font-medium text-red-500 gap-0.5">
+                <Trash2 size={10} />
+                Bảng
+              </span>
+            </ToolBtn>
+          </>
+        )}
       </div>
 
       {/* Editor */}
