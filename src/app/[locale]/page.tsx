@@ -197,59 +197,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Why Choose Lixin — Orbit Animation */}
-      <section className="py-20 sm:py-24 bg-gray-950 text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold">
-                {t("why_title")} <span className="text-yellow-500">Lixin</span>?
-              </h2>
-              <p className="mt-4 text-gray-400 text-lg">{t("why_subtitle")}</p>
-
-              <ul className="mt-8 space-y-6">
-                {(["why_feature_1", "why_feature_2", "why_feature_3"] as const).map((key) => (
-                  <li key={key} className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 font-bold text-sm">
-                      ✓
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-1">
-                        {t(`${key}_title` as const)}
-                      </strong>
-                      <span className="text-gray-400 text-sm">{t(`${key}_desc` as const)}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex justify-center items-center h-[400px]">
-              <div className="relative w-[300px] h-[300px] rounded-full border border-dashed border-yellow-500/30 flex items-center justify-center animate-[spin_30s_linear_infinite]">
-                <div className="w-[100px] h-[100px] bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center font-bold text-xl text-black shadow-[0_0_30px_rgba(234,179,8,0.25)] animate-[spin_30s_linear_infinite_reverse]">
-                  Lixin
-                </div>
-                <div className="absolute -top-[35px] left-[115px] w-[70px] h-[70px] bg-white/5 backdrop-blur border border-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-yellow-500 text-xs font-medium animate-[spin_30s_linear_infinite_reverse]">
-                    Tax
-                  </span>
-                </div>
-                <div className="absolute bottom-[20px] -right-[20px] w-[70px] h-[70px] bg-white/5 backdrop-blur border border-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-yellow-500 text-xs font-medium animate-[spin_30s_linear_infinite_reverse]">
-                    Finance
-                  </span>
-                </div>
-                <div className="absolute bottom-[20px] -left-[20px] w-[70px] h-[70px] bg-white/5 backdrop-blur border border-yellow-500 rounded-full flex items-center justify-center shadow-lg">
-                  <span className="text-yellow-500 text-xs font-medium animate-[spin_30s_linear_infinite_reverse]">
-                    Accounting
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* News Carousel — from Database */}
       <section className="py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -358,6 +305,59 @@ export default function HomePage() {
               {t("news_more")}
               <ArrowRight className="ml-2" size={18} />
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Lixin — Orbit Animation */}
+      <section className="py-20 sm:py-24 bg-gray-950 text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold">
+                {t("why_title")} <span className="text-yellow-500">Lixin</span>?
+              </h2>
+              <p className="mt-4 text-gray-400 text-lg">{t("why_subtitle")}</p>
+
+              <ul className="mt-8 space-y-6">
+                {(["why_feature_1", "why_feature_2", "why_feature_3"] as const).map((key) => (
+                  <li key={key} className="flex gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 font-bold text-sm">
+                      ✓
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-1">
+                        {t(`${key}_title` as const)}
+                      </strong>
+                      <span className="text-gray-400 text-sm">{t(`${key}_desc` as const)}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="flex justify-center items-center h-[400px]">
+              <div className="relative w-[300px] h-[300px] rounded-full border border-dashed border-yellow-500/30 flex items-center justify-center animate-[spin_30s_linear_infinite]">
+                <div className="w-[100px] h-[100px] bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center font-bold text-xl text-black shadow-[0_0_30px_rgba(234,179,8,0.25)] animate-[spin_30s_linear_infinite_reverse]">
+                  Lixin
+                </div>
+                <div className="absolute -top-[35px] left-[115px] w-[70px] h-[70px] bg-white/5 backdrop-blur border border-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-yellow-500 text-xs font-medium animate-[spin_30s_linear_infinite_reverse]">
+                    Tax
+                  </span>
+                </div>
+                <div className="absolute bottom-[20px] -right-[20px] w-[70px] h-[70px] bg-white/5 backdrop-blur border border-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-yellow-500 text-xs font-medium animate-[spin_30s_linear_infinite_reverse]">
+                    Finance
+                  </span>
+                </div>
+                <div className="absolute bottom-[20px] -left-[20px] w-[70px] h-[70px] bg-white/5 backdrop-blur border border-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+                  <span className="text-yellow-500 text-xs font-medium animate-[spin_30s_linear_infinite_reverse]">
+                    Accounting
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
