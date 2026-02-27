@@ -40,6 +40,19 @@ body {
   }
 }
 
+/* Toast notification animation */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 /* TipTap Editor Styles */
 .tiptap {
   outline: none;

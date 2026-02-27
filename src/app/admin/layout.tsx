@@ -61,6 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { label: "📊 Tổng quan", path: "/admin" },
     { label: "📰 Tin tức", path: "/admin/news" },
+    { label: "📞 Liên hệ", path: "/admin/contacts" },
     { label: "⬅️ Về trang chủ", path: "/vi" },
   ];
 

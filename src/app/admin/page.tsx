@@ -4,23 +4,50 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { News } from "@/types/news";
 
+interface ContactStats {
+  total: number;
+  new: number;
+  contacted: number;
+  converted: number;
+}
+
 export default function AdminDashboard() {
   const [news, setNews] = useState<News[]>([]);
+  const [contactStats, setContactStats] = useState<ContactStats>({
+    total: 0,
+    new: 0,
+    contacted: 0,
+    converted: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchNews = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch("/api/news?status=all&limit=1000");
-        const data = await res.json();
-        setNews(data.data || []);
+        const [newsRes, contactsRes] = await Promise.all([
+          fetch("/api/news?status=all&limit=1000"),
+          fetch("/api/contacts?limit=1000"),
+        ]);
+        const newsData = await newsRes.json();
+        setNews(newsData.data || []);
+
+        if (contactsRes.ok) {
+          const contactsData = await contactsRes.json();
+          const contacts = contactsData.data || [];
+          setContactStats({
+            total: contactsData.count || contacts.length,
+            new: contacts.filter((c: { status: string }) => c.status === "new").length,
+            contacted: contacts.filter((c: { status: string }) => c.status === "contacted").length,
+            converted: contacts.filter((c: { status: string }) => c.status === "converted").length,
+          });
+        }
       } catch {
-        console.error("Failed to fetch news");
+        console.error("Failed to fetch data");
       } finally {
         setLoading(false);
       }
     };
-    fetchNews();
+    fetchData();
   }, []);
 
   const published = news.filter((n) => n.status === "published").length;
@@ -49,6 +76,30 @@ export default function AdminDashboard() {
       bg: "bg-yellow-50",
       text: "text-yellow-700",
     },
+    {
+      label: "Liên hệ mới",
+      value: contactStats.new,
+      icon: "📞",
+      bg: "bg-red-50",
+      text: "text-red-700",
+      link: "/admin/contacts?status=new",
+    },
+    {
+      label: "Tổng liên hệ",
+      value: contactStats.total,
+      icon: "👥",
+      bg: "bg-purple-50",
+      text: "text-purple-700",
+      link: "/admin/contacts",
+    },
+    {
+      label: "Chuyển đổi",
+      value: contactStats.converted,
+      icon: "🎯",
+      bg: "bg-emerald-50",
+      text: "text-emerald-700",
+      link: "/admin/contacts?status=converted",
+    },
   ];
 
   if (loading) {
@@ -72,17 +123,25 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {stats.map((stat) => (
-          <div key={stat.label} className={`${stat.bg} rounded-xl p-6 border border-gray-100`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <p className={`text-3xl font-bold ${stat.text} mt-1`}>{stat.value}</p>
+        {stats.map((stat) => {
+          const Wrapper = stat.link ? Link : "div";
+          const wrapperProps = stat.link ? { href: stat.link } : {};
+          return (
+            <Wrapper
+              key={stat.label}
+              {...(wrapperProps as { href: string })}
+              className={`${stat.bg} rounded-xl p-6 border border-gray-100 ${stat.link ? "hover:shadow-md transition-shadow cursor-pointer" : ""}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">{stat.label}</p>
+                  <p className={`text-3xl font-bold ${stat.text} mt-1`}>{stat.value}</p>
+                </div>
+                <span className="text-3xl">{stat.icon}</span>
               </div>
-              <span className="text-3xl">{stat.icon}</span>
-            </div>
-          </div>
-        ))}
+            </Wrapper>
+          );
+        })}
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200">
