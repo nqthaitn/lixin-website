@@ -55,6 +55,7 @@ export default function EditNewsPage() {
     content_zh: "",
     category: "general",
     cover_image: "",
+    source_url: "",
     status: "draft" as "draft" | "published",
   });
 
@@ -76,6 +77,7 @@ export default function EditNewsPage() {
           content_zh: data.content_zh || "",
           category: data.category || "other",
           cover_image: data.cover_image || "",
+          source_url: data.source_url || "",
           status: data.status || "draft",
         });
       } catch {
@@ -243,6 +245,29 @@ export default function EditNewsPage() {
             />
           </div>
         </div>
+        {form.source_url && (
+          <div className="col-span-1 md:col-span-2 mt-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              🔗 Link bài gốc <span className="text-xs text-gray-400">(chỉ admin thấy)</span>
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="text"
+                value={form.source_url}
+                readOnly
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg bg-gray-50 text-gray-600 text-sm"
+              />
+              <a
+                href={form.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors whitespace-nowrap"
+              >
+                Mở bài gốc ↗
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}

@@ -72,6 +72,7 @@ export async function POST(request: Request) {
       category,
       cover_image,
       status,
+      source_url,
     } = body;
 
     if (!title_vi) {
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
           category: category || "general",
           cover_image: cover_image || "",
           status: status || "draft",
+          source_url: source_url || null,
           author: session.user.email || "",
         },
       ])

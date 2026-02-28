@@ -123,6 +123,17 @@ export default function AdminNewsPage() {
                   <td className="px-6 py-4">
                     <p className="font-medium text-gray-900 line-clamp-1">
                       {item.title_vi || "Chưa có tiêu đề"}
+                      {item.source_url && (
+                        <a
+                          href={item.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-2 text-blue-400 hover:text-blue-600"
+                          title="Xem bài gốc"
+                        >
+                          🔗
+                        </a>
+                      )}
                     </p>
                   </td>
                   <td className="px-6 py-4">

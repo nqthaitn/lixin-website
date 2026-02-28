@@ -12,6 +12,7 @@ export interface News {
   excerpt_zh: string;
   category: string;
   cover_image: string;
+  source_url: string | null;
   thumbnail: string;
   status: "draft" | "published";
   author: string;
