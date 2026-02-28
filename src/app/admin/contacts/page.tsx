@@ -17,6 +17,7 @@ import {
   Send,
   StickyNote,
   ExternalLink,
+  Trash2,
 } from "lucide-react";
 
 interface Contact {
@@ -81,6 +82,10 @@ export default function ContactsPage() {
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+
+  // Delete
+  const [deleteTarget, setDeleteTarget] = useState<Contact | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -205,6 +210,26 @@ export default function ContactsPage() {
       showToast("error", "Lỗi kết nối, vui lòng thử lại.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteContact = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/contacts?id=${deleteTarget.id}`, { method: "DELETE" });
+      if (res.ok) {
+        showToast("success", `Đã xóa liên hệ "${deleteTarget.name}"`);
+        setDeleteTarget(null);
+        if (selectedContact?.id === deleteTarget.id) closeDetail();
+        fetchContacts();
+      } else {
+        showToast("error", "Xóa thất bại, vui lòng thử lại.");
+      }
+    } catch {
+      showToast("error", "Lỗi kết nối, vui lòng thử lại.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -362,6 +387,13 @@ export default function ContactsPage() {
                       >
                         <ExternalLink size={12} />
                         Chi tiết
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(contact)}
+                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Xóa"
+                      >
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </div>
@@ -542,21 +574,32 @@ export default function ContactsPage() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
               <button
-                onClick={closeDetail}
-                className="px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors"
+                onClick={() => {
+                  setDeleteTarget(selectedContact);
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 text-red-500 text-sm font-medium hover:bg-red-50 rounded-lg transition-colors"
               >
-                Đóng
+                <Trash2 size={15} />
+                Xóa
               </button>
-              <button
-                onClick={saveContact}
-                disabled={saving}
-                className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                <Save size={16} />
-                {saving ? "Đang lưu..." : "Lưu thay đổi"}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={closeDetail}
+                  className="px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors"
+                >
+                  Đóng
+                </button>
+                <button
+                  onClick={saveContact}
+                  disabled={saving}
+                  className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                >
+                  <Save size={16} />
+                  {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -635,6 +678,41 @@ export default function ContactsPage() {
               >
                 <Send size={15} />
                 {sendingReply ? "Đang gửi..." : "Gửi email"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-black/50 z-[55] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
+            <div className="p-6 text-center">
+              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={24} className="text-red-500" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Xóa liên hệ?</h3>
+              <p className="text-sm text-gray-500">
+                Bạn có chắc muốn xóa liên hệ <strong>{deleteTarget.name}</strong>?
+                <br />
+                Hành động này không thể hoàn tác.
+              </p>
+            </div>
+            <div className="flex gap-3 px-6 pb-6">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                className="flex-1 px-4 py-2.5 text-gray-700 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={deleteContact}
+                disabled={deleting}
+                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                <Trash2 size={15} />
+                {deleting ? "Đang xóa..." : "Xóa"}
               </button>
             </div>
           </div>
