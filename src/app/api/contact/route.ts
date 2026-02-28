@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, email, service, date, time, notes } = body;
+    const { name, phone, email, service, date, time, notes, locale } = body;
+    const customerLocale = ["vi", "en", "zh"].includes(locale) ? locale : "vi";
 
     if (!name || !phone) {
       return NextResponse.json({ error: "Tên và số điện thoại là bắt buộc" }, { status: 400 });
@@ -43,6 +44,7 @@ export async function POST(request: Request) {
         message,
         source: "website",
         status: "new",
+        locale: customerLocale,
       })
       .select()
       .single();
@@ -52,14 +54,21 @@ export async function POST(request: Request) {
     }
 
     // Send email notification to admin (non-blocking)
-    sendEmailNotification({ name, phone, email, service, date, time, notes }).catch((err) =>
-      console.error("[Contact] Admin email error:", err)
-    );
+    sendEmailNotification({
+      name,
+      phone,
+      email,
+      service,
+      date,
+      time,
+      notes,
+      locale: customerLocale,
+    }).catch((err) => console.error("[Contact] Admin email error:", err));
 
     // Send confirmation email to customer (non-blocking)
     if (email) {
-      sendCustomerConfirmation({ name, email, service, date, time }).catch((err) =>
-        console.error("[Contact] Customer email error:", err)
+      sendCustomerConfirmation({ name, email, service, date, time, locale: customerLocale }).catch(
+        (err) => console.error("[Contact] Customer email error:", err)
       );
     }
 
@@ -77,7 +86,13 @@ async function sendEmailNotification(info: {
   date?: string;
   time?: string;
   notes?: string;
+  locale?: string;
 }) {
+  const LOCALE_LABELS: Record<string, string> = {
+    vi: "🇻🇳 Tiếng Việt",
+    en: "🇬🇧 English",
+    zh: "🇨🇳 中文",
+  };
   const SERVICE_LABELS: Record<string, string> = {
     accounting: "Kế toán",
     management: "Quản lý",
@@ -119,6 +134,10 @@ async function sendEmailNotification(info: {
           ${info.date ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Ngày hẹn:</td><td style="padding: 8px 0; color: #1f2937;">${info.date}</td></tr>` : ""}
           ${info.time ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Giờ:</td><td style="padding: 8px 0; color: #1f2937;">${info.time}</td></tr>` : ""}
           ${info.notes ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Ghi chú:</td><td style="padding: 8px 0; color: #1f2937;">${info.notes}</td></tr>` : ""}
+          <tr>
+            <td style="padding: 8px 0; font-weight: bold; color: #374151;">Ngôn ngữ:</td>
+            <td style="padding: 8px 0; color: #1f2937;">${LOCALE_LABELS[info.locale || "vi"] || info.locale}</td>
+          </tr>
         </table>
       </div>
       <div style="background: #f9fafb; padding: 16px; text-align: center; color: #6b7280; font-size: 12px; border: 1px solid #e5e7eb; border-top: 0;">
@@ -163,59 +182,152 @@ async function sendCustomerConfirmation(info: {
   service?: string;
   date?: string;
   time?: string;
+  locale?: string;
 }) {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return;
 
-  const SERVICE_LABELS: Record<string, string> = {
-    accounting: "Dịch vụ kế toán",
-    management: "Tư vấn quản lý",
-    tax: "Tư vấn thuế",
-    finance: "Tư vấn tài chính",
-    investment: "Tư vấn đầu tư",
-    hr: "Tư vấn nguồn nhân lực",
-    tech: "Tư vấn chuyển giao công nghệ",
-    customs: "Dịch vụ khai báo hải quan",
-    setup: "Thành lập doanh nghiệp",
+  const locale = info.locale || "vi";
+  const logoUrl = "https://lixinvn.com/images/logo-lixin.png";
+
+  // i18n translations
+  const i18n: Record<string, Record<string, string>> = {
+    vi: {
+      subtitle: "TƯ VẤN KẾ TOÁN & PHÁP LÝ",
+      greeting: `Kính gửi <strong>${info.name}</strong>,`,
+      thanks: `Cảm ơn Quý khách đã tin tưởng và gửi yêu cầu tư vấn đến <strong>Công ty TNHH Dịch vụ và Tư vấn Lixin (Việt Nam)</strong>.`,
+      received:
+        "Chúng tôi đã tiếp nhận thông tin{service} của Quý khách. \nĐội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm nhất (trong vòng <strong>24 giờ làm việc</strong>) để hỗ trợ chi tiết.",
+      appointmentTitle: "📅 Thông tin lịch hẹn",
+      dateLabel: "Ngày:",
+      timeLabel: "Khung giờ:",
+      contactUs: "Nếu có bất kỳ thắc mắc nào, Quý khách vui lòng liên hệ:",
+      regards: "Trân trọng,",
+      team: "Đội ngũ Lixin Việt Nam",
+      companyFull: "Công ty TNHH Dịch vụ và Tư vấn Lixin (Việt Nam)",
+      address: "Số 2, Tổ 4, Ấp 4, xã Truông Mít, Tỉnh Tây Ninh",
+      autoEmail: "Email này được gửi tự động. Vui lòng không trả lời email này.",
+    },
+    en: {
+      subtitle: "ACCOUNTING & TAX ADVISORY",
+      greeting: `Dear <strong>${info.name}</strong>,`,
+      thanks: `Thank you for your trust and for submitting a consultation request to <strong>Lixin Consulting & Services Co., Ltd (Vietnam)</strong>.`,
+      received:
+        "We have received your information{service}. \nOur consulting team will contact you as soon as possible (within <strong>24 business hours</strong>) to provide detailed assistance.",
+      appointmentTitle: "📅 Appointment Information",
+      dateLabel: "Date:",
+      timeLabel: "Time:",
+      contactUs: "If you have any questions, please contact us:",
+      regards: "Best regards,",
+      team: "Lixin Vietnam Team",
+      companyFull: "Lixin Consulting & Services Co., Ltd (Vietnam)",
+      address: "No. 2, Group 4, Hamlet 4, Truong Mit Commune, Tay Ninh Province",
+      autoEmail: "This is an automated email. Please do not reply to this email.",
+    },
+    zh: {
+      subtitle: "会计与税务咨询",
+      greeting: `尊敬的 <strong>${info.name}</strong>，`,
+      thanks: `感谢您的信任，并向 <strong>Lixin咨询与服务有限责任公司（越南）</strong> 提交咨询请求。`,
+      received:
+        "我们已收到您的信息{service}。\n我们的咨询团队将尽快与您联系（在 <strong>24 个工作时内</strong>），以提供详细的帮助。",
+      appointmentTitle: "📅 预约信息",
+      dateLabel: "日期：",
+      timeLabel: "时间：",
+      contactUs: "如有任何疑问，请联系我们：",
+      regards: "此致敬意，",
+      team: "Lixin越南团队",
+      companyFull: "Lixin咨询与服务有限责任公司（越南）",
+      address: "西宁省信德县 Truong Mit社4杜4组2号",
+      autoEmail: "本邮件为自动发送，请勿回复。",
+    },
   };
 
-  const serviceLabel = info.service ? SERVICE_LABELS[info.service] || info.service : "";
+  const t = i18n[locale] || i18n.vi;
+
+  const SERVICE_LABELS: Record<string, Record<string, string>> = {
+    vi: {
+      accounting: "Dịch vụ kế toán",
+      management: "Tư vấn quản lý",
+      tax: "Tư vấn thuế",
+      finance: "Tư vấn tài chính",
+      investment: "Tư vấn đầu tư",
+      hr: "Tư vấn nguồn nhân lực",
+      tech: "Tư vấn chuyển giao công nghệ",
+      customs: "Khai báo hải quan",
+      setup: "Thành lập doanh nghiệp",
+    },
+    en: {
+      accounting: "Accounting Services",
+      management: "Management Consulting",
+      tax: "Tax Advisory",
+      finance: "Financial Consulting",
+      investment: "Investment Consulting",
+      hr: "HR Consulting",
+      tech: "Technology Transfer",
+      customs: "Customs Declaration",
+      setup: "Business Setup",
+    },
+    zh: {
+      accounting: "会计服务",
+      management: "管理咨询",
+      tax: "税务咨询",
+      finance: "财务咨询",
+      investment: "投资咨询",
+      hr: "人力资源咨询",
+      tech: "技术转让",
+      customs: "海关申报",
+      setup: "企业设立",
+    },
+  };
+
+  const svcLabels = SERVICE_LABELS[locale] || SERVICE_LABELS.vi;
+  const serviceLabel = info.service ? svcLabels[info.service] || info.service : "";
 
   const appointmentHtml =
     info.date || info.time
       ? `
         <div style="background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 20px 0;">
-          <p style="margin: 0 0 8px; font-weight: bold; color: #374151; font-size: 15px;">📅 Thông tin lịch hẹn</p>
-          ${info.date ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">Ngày: <strong style="color: #1f2937;">${info.date}</strong></p>` : ""}
-          ${info.time ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">Khung giờ: <strong style="color: #1f2937;">${info.time}</strong></p>` : ""}
+          <p style="margin: 0 0 8px; font-weight: bold; color: #374151; font-size: 15px;">${t.appointmentTitle}</p>
+          ${info.date ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">${t.dateLabel} <strong style="color: #1f2937;">${info.date}</strong></p>` : ""}
+          ${info.time ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">${t.timeLabel} <strong style="color: #1f2937;">${info.time}</strong></p>` : ""}
         </div>
       `
       : "";
 
-  const subject = `Cảm ơn ${info.name} — Lixin VN đã nhận yêu cầu tư vấn của bạn`;
+  const subjects: Record<string, string> = {
+    vi: `Cảm ơn ${info.name} — Lixin VN đã nhận yêu cầu tư vấn của bạn`,
+    en: `Thank you ${info.name} — Lixin VN has received your consultation request`,
+    zh: `感谢 ${info.name} — Lixin VN 已收到您的咨询请求`,
+  };
+
+  const subject = subjects[locale] || subjects.vi;
+  const receivedText = t.received.replace(
+    "{service}",
+    serviceLabel ? ` <strong>${serviceLabel}</strong>` : ""
+  );
+
   const html = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
       <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 32px 24px; text-align: center;">
-        <img src="https://lixinvn.com/images/logo-lixin.png" alt="Lixin Vietnam" width="180" height="62" style="display: block; margin: 0 auto 8px;" />
-        <p style="margin: 0; color: #9ca3af; font-size: 13px; letter-spacing: 1px;">TƯ VẤN KẾ TOÁN & PHÁP LÝ</p>
+        <img src="${logoUrl}" alt="Lixin Vietnam" width="180" height="62" style="display: block; margin: 0 auto 8px;" />
+        <p style="margin: 0; color: #9ca3af; font-size: 13px; letter-spacing: 1px;">${t.subtitle}</p>
       </div>
 
       <div style="padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
-        <p style="font-size: 16px; color: #1f2937; margin: 0 0 8px;">Kính gửi <strong>${info.name}</strong>,</p>
+        <p style="font-size: 16px; color: #1f2937; margin: 0 0 8px;">${t.greeting}</p>
         
         <p style="font-size: 14px; color: #4b5563; line-height: 1.7; margin: 16px 0;">
-          Cảm ơn Quý khách đã tin tưởng và gửi yêu cầu tư vấn đến <strong>Công ty TNHH Dịch vụ và Tư vấn Lixin (Việt Nam)</strong>.
+          ${t.thanks}
         </p>
 
         <p style="font-size: 14px; color: #4b5563; line-height: 1.7; margin: 16px 0;">
-          Chúng tôi đã tiếp nhận thông tin${serviceLabel ? ` về <strong>${serviceLabel}</strong>` : ""} của Quý khách. 
-          Đội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm nhất (trong vòng <strong>24 giờ làm việc</strong>) để hỗ trợ chi tiết.
+          ${receivedText}
         </p>
 
         ${appointmentHtml}
 
         <p style="font-size: 14px; color: #4b5563; line-height: 1.7; margin: 16px 0;">
-          Nếu có bất kỳ thắc mắc nào, Quý khách vui lòng liên hệ:
+          ${t.contactUs}
         </p>
 
         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
@@ -224,14 +336,14 @@ async function sendCustomerConfirmation(info: {
           <p style="margin: 4px 0; font-size: 14px; color: #374151;">🌐 Website: <a href="https://lixinvn.com" style="color: #eab308; text-decoration: none; font-weight: bold;">lixinvn.com</a></p>
         </div>
 
-        <p style="font-size: 14px; color: #4b5563; line-height: 1.7; margin: 20px 0 4px;">Trân trọng,</p>
-        <p style="font-size: 14px; color: #1f2937; font-weight: 600; margin: 0;">Đội ngũ Lixin Việt Nam</p>
+        <p style="font-size: 14px; color: #4b5563; line-height: 1.7; margin: 20px 0 4px;">${t.regards}</p>
+        <p style="font-size: 14px; color: #1f2937; font-weight: 600; margin: 0;">${t.team}</p>
       </div>
 
       <div style="background: #1a1a1a; padding: 20px 24px; text-align: center;">
-        <p style="margin: 0 0 4px; color: #9ca3af; font-size: 12px;">Công ty TNHH Dịch vụ và Tư vấn Lixin (Việt Nam)</p>
-        <p style="margin: 0; color: #6b7280; font-size: 11px;">Số 2, Tổ 4, Ấp 4, xã Truông Mít, Tỉnh Tây Ninh</p>
-        <p style="margin: 8px 0 0; color: #4b5563; font-size: 11px;">Email này được gửi tự động. Vui lòng không trả lời email này.</p>
+        <p style="margin: 0 0 4px; color: #9ca3af; font-size: 12px;">${t.companyFull}</p>
+        <p style="margin: 0; color: #6b7280; font-size: 11px;">${t.address}</p>
+        <p style="margin: 8px 0 0; color: #4b5563; font-size: 11px;">${t.autoEmail}</p>
       </div>
     </div>
   `;

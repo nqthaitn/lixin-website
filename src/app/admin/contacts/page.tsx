@@ -30,6 +30,7 @@ interface Contact {
   source: string;
   status: string;
   admin_note?: string | null;
+  locale?: string;
   created_at: string;
 }
 
@@ -54,6 +55,12 @@ const SERVICE_LABELS: Record<string, string> = {
   general: "Chung",
   accounting: "Kế toán",
   other: "Khác",
+};
+
+const LOCALE_CONFIG: Record<string, { flag: string; label: string }> = {
+  vi: { flag: "🇻🇳", label: "Tiếng Việt" },
+  en: { flag: "🇬🇧", label: "English" },
+  zh: { flag: "🇨🇳", label: "中文" },
 };
 
 const PAGE_SIZE = 20;
@@ -343,6 +350,15 @@ export default function ContactsPage() {
                           <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
                             {SERVICE_LABELS[contact.service_type] || contact.service_type}
                           </span>
+                          {contact.locale && (
+                            <span
+                              className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded"
+                              title={LOCALE_CONFIG[contact.locale]?.label || contact.locale}
+                            >
+                              {LOCALE_CONFIG[contact.locale]?.flag || "🌐"}{" "}
+                              {LOCALE_CONFIG[contact.locale]?.label || contact.locale}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-4 mt-1.5 text-sm text-gray-500">
                           <a
@@ -511,6 +527,19 @@ export default function ContactsPage() {
                   <div className="bg-gray-50 rounded-lg p-3">
                     <p className="text-gray-500 text-xs mb-1">Nguồn</p>
                     <p className="text-gray-900 font-medium">{selectedContact.source}</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-gray-500 text-xs mb-1">Ngôn ngữ</p>
+                    <p className="text-gray-900 font-medium">
+                      {selectedContact.locale ? (
+                        <>
+                          {LOCALE_CONFIG[selectedContact.locale]?.flag}{" "}
+                          {LOCALE_CONFIG[selectedContact.locale]?.label || selectedContact.locale}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </p>
                   </div>
                 </div>
 

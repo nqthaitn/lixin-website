@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useState } from "react";
 import { MapPin, Phone, Mail } from "lucide-react";
 
@@ -8,6 +8,7 @@ export default function ContactPage() {
   const t = useTranslations("contact");
   const tServices = useTranslations("services");
   const tFooter = useTranslations("footer");
+  const locale = useLocale();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -32,7 +33,7 @@ export default function ContactPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, locale }),
       });
 
       if (!res.ok) {
