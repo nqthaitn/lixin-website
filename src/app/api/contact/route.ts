@@ -133,7 +133,7 @@ async function sendEmailNotification(info: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Lixin VN <onboarding@resend.dev>",
+      from: "Lixin VN <noreply@lixinvn.com>",
       to: ["lixinvn.co.ltd@gmail.com"],
       subject,
       html,
