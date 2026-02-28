@@ -92,12 +92,14 @@ async function sendEmailNotification(info: {
 
   const serviceLabel = info.service ? SERVICE_LABELS[info.service] || info.service : "Chưa chọn";
 
+  const logoUrl = "https://lixinvn.com/images/logo-lixin.png";
+
   const subject = `[Lixin VN] Yêu cầu tư vấn mới từ ${info.name}`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <div style="background: #1a1a1a; color: #eab308; padding: 20px; text-align: center;">
-        <h1 style="margin: 0; font-size: 24px;">LIXIN VN</h1>
-        <p style="margin: 5px 0 0; color: #9ca3af; font-size: 14px;">Yêu cầu tư vấn mới</p>
+      <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 24px; text-align: center;">
+        <img src="${logoUrl}" alt="Lixin Vietnam" width="160" height="55" style="display: block; margin: 0 auto 8px;" />
+        <p style="margin: 0; color: #9ca3af; font-size: 13px; letter-spacing: 1px;">Yêu cầu tư vấn mới</p>
       </div>
       <div style="padding: 24px; background: #fff; border: 1px solid #e5e7eb;">
         <table style="width: 100%; border-collapse: collapse;">
@@ -194,8 +196,8 @@ async function sendCustomerConfirmation(info: {
   const html = `
     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
       <div style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 32px 24px; text-align: center;">
-        <h1 style="margin: 0; font-size: 28px; color: #eab308; letter-spacing: 2px;">LIXIN</h1>
-        <p style="margin: 4px 0 0; color: #9ca3af; font-size: 13px; letter-spacing: 1px;">TƯ VẤN KẾ TOÁN & PHÁP LÝ</p>
+        <img src="https://lixinvn.com/images/logo-lixin.png" alt="Lixin Vietnam" width="180" height="62" style="display: block; margin: 0 auto 8px;" />
+        <p style="margin: 0; color: #9ca3af; font-size: 13px; letter-spacing: 1px;">TƯ VẤN KẾ TOÁN & PHÁP LÝ</p>
       </div>
 
       <div style="padding: 32px 24px; border: 1px solid #e5e7eb; border-top: none;">
