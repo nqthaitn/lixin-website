@@ -263,10 +263,10 @@ export default function ContactPage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all bg-white"
                   >
                     <option value="">{t("time_placeholder")}</option>
-                    <option value="time_1">{t("time_1")}</option>
-                    <option value="time_2">{t("time_2")}</option>
-                    <option value="time_3">{t("time_3")}</option>
-                    <option value="time_4">{t("time_4")}</option>
+                    <option value="8:00-10:00">{t("time_1")}</option>
+                    <option value="10:00-12:00">{t("time_2")}</option>
+                    <option value="14:00-16:00">{t("time_3")}</option>
+                    <option value="16:00-18:00">{t("time_4")}</option>
                   </select>
                 </div>
               </div>

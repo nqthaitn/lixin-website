@@ -52,8 +52,8 @@ export async function POST(request: Request) {
     }
 
     // Send email notification (non-blocking)
-    sendEmailNotification({ name, phone, email, service, date, time, notes }).catch(
-      () => {} // Ignore email errors
+    sendEmailNotification({ name, phone, email, service, date, time, notes }).catch((err) =>
+      console.error("[Contact] Email error:", err)
     );
 
     return NextResponse.json({ data, success: true }, { status: 201 });
@@ -113,7 +113,7 @@ async function sendEmailNotification(info: {
         </table>
       </div>
       <div style="background: #f9fafb; padding: 16px; text-align: center; color: #6b7280; font-size: 12px; border: 1px solid #e5e7eb; border-top: 0;">
-        <p>Email này được gửi tự động từ website lixin.vn</p>
+        <p>Email này được gửi tự động từ website lixinvn.com</p>
       </div>
     </div>
   `;
@@ -126,17 +126,24 @@ async function sendEmailNotification(info: {
     return;
   }
 
-  await fetch("https://api.resend.com/emails", {
+  const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${resendKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Lixin VN <noreply@lixin.vn>",
+      from: "Lixin VN <onboarding@resend.dev>",
       to: ["lixinvn.co.ltd@gmail.com"],
       subject,
       html,
     }),
   });
+
+  const result = await res.json();
+  if (!res.ok) {
+    console.error("[Contact] Resend API error:", result);
+  } else {
+    console.log("[Contact] Email sent:", result.id);
+  }
 }
