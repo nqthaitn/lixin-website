@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Phone, Mail, MapPin } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -11,7 +12,13 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <span className="text-2xl font-bold text-yellow-500">LIXIN</span>
+            <Image
+              src="/images/logo-lixin.png"
+              alt="Lixin Vietnam"
+              width={140}
+              height={48}
+              className="h-10 w-auto object-contain"
+            />
             <p className="mt-4 text-sm">{t("company")}</p>
           </div>
 

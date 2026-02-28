@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { Menu, X, Globe, ChevronDown } from "lucide-react";
+import Image from "next/image";
 
 const locales = [
   { code: "vi" as const, label: "🇻🇳 Tiếng Việt" },
@@ -35,11 +36,15 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-yellow-500/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-yellow-500">LIXIN</span>
-            <span className="hidden sm:block text-xs text-gray-400 border-l border-gray-600 pl-2">
-              VIETNAM
-            </span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/images/logo-lixin.png"
+              alt="Lixin Vietnam"
+              width={140}
+              height={48}
+              className="h-10 w-auto object-contain"
+              priority
+            />
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
