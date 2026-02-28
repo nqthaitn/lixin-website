@@ -140,7 +140,7 @@ async function sendEmailNotification(info: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Lixin VN <noreply@lixinvn.com>",
+      from: "Lixin VN <noreply@send.lixinvn.com>",
       to: ["lixinvn.co.ltd@gmail.com"],
       subject,
       html,
@@ -241,7 +241,7 @@ async function sendCustomerConfirmation(info: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "Lixin VN <noreply@lixinvn.com>",
+      from: "Lixin VN <noreply@send.lixinvn.com>",
       to: [info.email],
       subject,
       html,
