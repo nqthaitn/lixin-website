@@ -14,6 +14,9 @@ import {
   Save,
   CheckCircle,
   AlertCircle,
+  Send,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 interface Contact {
@@ -71,6 +74,15 @@ export default function ContactsPage() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
+  // Reply email
+  const [showReply, setShowReply] = useState(false);
+  const [replySubject, setReplySubject] = useState("");
+  const [replyMessage, setReplyMessage] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
+
+  // Expand row
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
@@ -123,10 +135,54 @@ export default function ContactsPage() {
     setSelectedContact(contact);
     setEditStatus(contact.status);
     setEditNote(contact.admin_note || "");
+    setShowReply(false);
+    setReplySubject(`Re: Yêu cầu tư vấn — ${contact.name}`);
+    setReplyMessage("");
   };
 
   const closeDetail = () => {
     setSelectedContact(null);
+    setShowReply(false);
+  };
+
+  const toggleRow = (id: number) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const sendReply = async () => {
+    if (!selectedContact?.email || !replyMessage.trim()) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch("/api/contacts/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contactId: selectedContact.id,
+          to: selectedContact.email,
+          subject: replySubject,
+          message: replyMessage,
+        }),
+      });
+      if (res.ok) {
+        showToast("success", `Đã gửi email cho ${selectedContact.email}`);
+        setShowReply(false);
+        setReplyMessage("");
+        // Refresh the contact to get updated admin_note
+        fetchContacts();
+      } else {
+        const data = await res.json();
+        showToast("error", data.error || "Gửi email thất bại");
+      }
+    } catch {
+      showToast("error", "Lỗi kết nối, vui lòng thử lại.");
+    } finally {
+      setSendingReply(false);
+    }
   };
 
   const saveContact = async () => {
@@ -278,8 +334,45 @@ export default function ContactsPage() {
                       <td className="px-6 py-4">
                         <div className="font-medium text-gray-900">{contact.name}</div>
                         {contact.message && (
-                          <div className="text-xs text-gray-500 mt-1 max-w-[200px] truncate">
-                            {contact.message}
+                          <div className="mt-1">
+                            <button
+                              onClick={() => toggleRow(contact.id)}
+                              className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700"
+                            >
+                              <MessageSquare size={11} />
+                              {expandedRows.has(contact.id) ? (
+                                <>
+                                  <span>Ẩn tin nhắn</span>
+                                  <ChevronUp size={12} />
+                                </>
+                              ) : (
+                                <>
+                                  <span className="max-w-[180px] truncate inline-block align-bottom">
+                                    {contact.message}
+                                  </span>
+                                  <ChevronDown size={12} />
+                                </>
+                              )}
+                            </button>
+                            {expandedRows.has(contact.id) && (
+                              <div className="mt-1.5 p-2 bg-gray-50 rounded-lg text-xs text-gray-700 whitespace-pre-wrap">
+                                {contact.message}
+                                {contact.admin_note && (
+                                  <div className="mt-2 pt-2 border-t border-gray-200 text-amber-700">
+                                    <span className="font-medium">📝 Ghi chú:</span>{" "}
+                                    {contact.admin_note}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {!contact.message && contact.admin_note && (
+                          <div
+                            className="mt-1 text-xs text-amber-600 truncate max-w-[200px]"
+                            title={contact.admin_note}
+                          >
+                            📝 {contact.admin_note}
                           </div>
                         )}
                       </td>
@@ -465,6 +558,61 @@ export default function ContactsPage() {
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-y"
                 />
               </div>
+
+              {/* Reply email */}
+              {selectedContact.email && (
+                <div>
+                  <button
+                    onClick={() => setShowReply(!showReply)}
+                    className="flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    <Send size={15} />
+                    {showReply ? "Ẩn form trả lời" : "Trả lời qua email"}
+                  </button>
+
+                  {showReply && (
+                    <div className="mt-3 space-y-3 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Gửi đến
+                        </label>
+                        <p className="text-sm text-gray-800 font-medium">{selectedContact.email}</p>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Tiêu đề
+                        </label>
+                        <input
+                          type="text"
+                          value={replySubject}
+                          onChange={(e) => setReplySubject(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          Nội dung
+                        </label>
+                        <textarea
+                          rows={5}
+                          value={replyMessage}
+                          onChange={(e) => setReplyMessage(e.target.value)}
+                          placeholder={`Kính gửi ${selectedContact.name},\n\nCảm ơn bạn đã liên hệ...`}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
+                        />
+                      </div>
+                      <button
+                        onClick={sendReply}
+                        disabled={sendingReply || !replyMessage.trim()}
+                        className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      >
+                        <Send size={14} />
+                        {sendingReply ? "Đang gửi..." : "Gửi email"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Footer */}
