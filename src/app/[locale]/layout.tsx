@@ -24,9 +24,9 @@ export async function generateMetadata({
   };
 
   const descriptions: Record<string, string> = {
-    vi: "Công ty TNHH Dịch vụ và Tư vấn Lixin — Dịch vụ kế toán, tư vấn thuế, thành lập doanh nghiệp tại Tây Ninh, Việt Nam. Đội ngũ chuyên gia Việt-Trung.",
-    en: "Lixin Vietnam — Professional accounting, tax advisory and business setup services in Tay Ninh, Vietnam. Vietnamese-Chinese expert team.",
-    zh: "Lixin Vietnam — 越南西宁省专业会计、税务咨询及企业设立服务。越中专家团队。",
+    vi: "Công ty TNHH Dịch vụ và Tư vấn Lixin — Dịch vụ kế toán, tư vấn thuế, thành lập công ty, thành lập hộ kinh doanh, doanh nghiệp tại Tây Ninh, Việt Nam. Đội ngũ chuyên gia Việt-Trung.",
+    en: "Lixin Vietnam — Professional accounting, tax advisory, company registration, and business setup services in Tay Ninh, Vietnam. Vietnamese-Chinese expert team.",
+    zh: "Lixin Vietnam — 越南西宁省专业会计、税务咨询、公司注册及企业设立服务。越中专家团队。",
   };
 
   return {
@@ -42,6 +42,10 @@ export async function generateMetadata({
             "kế toán Tây Ninh",
             "thuế Tây Ninh",
             "Lixin Vietnam",
+            "thành lập công ty tại Tây Ninh",
+            "thành lập hộ kinh doanh tại Tây Ninh",
+            "thành lập doanh nghiệp tại Tây Ninh",
+            "đăng ký kinh doanh Tây Ninh",
           ]
         : locale === "en"
           ? [
@@ -51,8 +55,21 @@ export async function generateMetadata({
               "business setup",
               "Vietnam",
               "Lixin Vietnam",
+              "company registration in Tay Ninh",
+              "business setup Tay Ninh",
+              "enterprise establishment Tay Ninh",
             ]
-          : ["会计服务", "税务咨询", "西宁省", "企业设立", "越南", "Lixin Vietnam"],
+          : [
+              "会计服务",
+              "税务咨询",
+              "西宁省",
+              "企业设立",
+              "越南",
+              "Lixin Vietnam",
+              "西宁省公司注册",
+              "西宁省企业设立",
+              "西宁省营业执照",
+            ],
     openGraph: {
       type: "website",
       locale: locale === "vi" ? "vi_VN" : locale === "en" ? "en_US" : "zh_CN",
@@ -112,7 +129,13 @@ export default async function LocaleLayout({
               longitude: 106.0989,
             },
             areaServed: "Tây Ninh, Việt Nam",
-            serviceType: ["Accounting", "Tax Advisory", "Business Registration"],
+            serviceType: [
+              "Accounting",
+              "Tax Advisory",
+              "Business Registration",
+              "Company Formation",
+              "Individual Business Setup",
+            ],
             foundingDate: "2019",
             knowsLanguage: ["vi", "en", "zh"],
           }),
