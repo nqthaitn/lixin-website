@@ -46,6 +46,12 @@ export async function generateMetadata({
             "thành lập hộ kinh doanh tại Tây Ninh",
             "thành lập doanh nghiệp tại Tây Ninh",
             "đăng ký kinh doanh Tây Ninh",
+            "dịch vụ kế toán tại Tây Ninh",
+            "tư vấn thuế tại Tây Ninh",
+            "khai báo hải quan Tây Ninh",
+            "dịch vụ kế toán trọn gói",
+            "báo cáo tài chính Tây Ninh",
+            "công ty kế toán Tây Ninh",
           ]
         : locale === "en"
           ? [
@@ -58,6 +64,12 @@ export async function generateMetadata({
               "company registration in Tay Ninh",
               "business setup Tay Ninh",
               "enterprise establishment Tay Ninh",
+              "accounting services in Tay Ninh",
+              "tax consulting Tay Ninh",
+              "customs declaration Tay Ninh",
+              "full-service accounting",
+              "financial reporting Tay Ninh",
+              "accounting firm Tay Ninh",
             ]
           : [
               "会计服务",
@@ -69,6 +81,12 @@ export async function generateMetadata({
               "西宁省公司注册",
               "西宁省企业设立",
               "西宁省营业执照",
+              "西宁省会计服务",
+              "西宁省税务咨询",
+              "西宁省海关申报",
+              "全套会计服务",
+              "西宁省财务报告",
+              "西宁省会计事务所",
             ],
     openGraph: {
       type: "website",
