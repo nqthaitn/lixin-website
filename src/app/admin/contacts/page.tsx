@@ -259,7 +259,7 @@ export default function ContactsPage() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col gap-3">
           <div className="flex-1 relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
@@ -272,40 +272,43 @@ export default function ContactsPage() {
             />
           </div>
 
-          <div className="relative">
-            <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              className="pl-9 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm appearance-none bg-white"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="new">🔵 Mới</option>
-              <option value="contacted">🟡 Đã liên hệ</option>
-              <option value="converted">🟢 Thành công</option>
-              <option value="rejected">🔴 Từ chối</option>
-            </select>
-          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="relative">
+              <Filter
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
+              <select
+                value={statusFilter}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm appearance-none bg-white"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="new">🔵 Mới</option>
+                <option value="contacted">🟡 Đã liên hệ</option>
+                <option value="converted">🟢 Thành công</option>
+                <option value="rejected">🔴 Từ chối</option>
+              </select>
+            </div>
 
-          <div>
             <select
               value={serviceFilter}
               onChange={(e) => handleServiceChange(e.target.value)}
-              className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm appearance-none bg-white"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm appearance-none bg-white"
             >
               <option value="all">Tất cả dịch vụ</option>
               <option value="general">Chung</option>
               <option value="accounting">Kế toán</option>
               <option value="other">Khác</option>
             </select>
-          </div>
 
-          <button
-            onClick={handleSearch}
-            className="bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
-          >
-            Tìm kiếm
-          </button>
+            <button
+              onClick={handleSearch}
+              className="col-span-2 md:col-span-1 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              Tìm kiếm
+            </button>
+          </div>
         </div>
       </div>
 
@@ -331,51 +334,57 @@ export default function ContactsPage() {
                 }`}
               >
                 {/* Card Header */}
-                <div className="px-5 py-4">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="px-4 sm:px-5 py-3 sm:py-4">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     {/* Left: Avatar + Info */}
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
                         {contact.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <h3 className="font-semibold text-gray-900">{contact.name}</h3>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
+                            {contact.name}
+                          </h3>
                           <span
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium ${sc.bg} ${sc.text}`}
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${sc.bg} ${sc.text}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
                             {sc.label}
                           </span>
-                          <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded">
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
                             {SERVICE_LABELS[contact.service_type] || contact.service_type}
                           </span>
                           {contact.locale && (
                             <span
-                              className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded"
+                              className="text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded"
                               title={LOCALE_CONFIG[contact.locale]?.label || contact.locale}
                             >
                               {LOCALE_CONFIG[contact.locale]?.flag || "🌐"}{" "}
-                              {LOCALE_CONFIG[contact.locale]?.label || contact.locale}
+                              <span className="hidden sm:inline">
+                                {LOCALE_CONFIG[contact.locale]?.label || contact.locale}
+                              </span>
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-4 mt-1.5 text-sm text-gray-500">
+                        <div className="flex items-center gap-3 mt-1.5 text-xs sm:text-sm text-gray-500 flex-wrap">
                           <a
                             href={`tel:${contact.phone}`}
-                            className="flex items-center gap-1.5 hover:text-blue-600 transition-colors"
+                            className="flex items-center gap-1 hover:text-blue-600 transition-colors"
                           >
-                            <Phone size={13} className="text-gray-400" />
+                            <Phone size={12} className="text-gray-400" />
                             {contact.phone}
                           </a>
                           {contact.email && (
-                            <span className="flex items-center gap-1.5">
-                              <Mail size={13} className="text-gray-400" />
-                              {contact.email}
+                            <span className="flex items-center gap-1 truncate max-w-[160px] sm:max-w-none">
+                              <Mail size={12} className="text-gray-400 flex-shrink-0" />
+                              <span className="truncate">{contact.email}</span>
                             </span>
                           )}
-                          <span className="flex items-center gap-1.5 text-xs">
-                            <Clock size={12} className="text-gray-400" />
+                          <span className="flex items-center gap-1 text-xs">
+                            <Clock size={11} className="text-gray-400" />
                             {new Date(contact.created_at).toLocaleDateString("vi-VN")}{" "}
                             {new Date(contact.created_at).toLocaleTimeString("vi-VN", {
                               hour: "2-digit",
@@ -386,8 +395,8 @@ export default function ContactsPage() {
                       </div>
                     </div>
 
-                    {/* Right: Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    {/* Actions - stacked on mobile, inline on desktop */}
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
                       {contact.email && (
                         <button
                           onClick={() => openReply(contact)}

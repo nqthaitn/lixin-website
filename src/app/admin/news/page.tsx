@@ -93,57 +93,112 @@ export default function AdminNewsPage() {
             </Link>
           </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
-                  #
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
-                  Tiêu đề
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
-                  Danh mục
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
-                  Trạng thái
-                </th>
-                <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
-                  Ngày tạo
-                </th>
-                <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
+          <>
+            {/* Desktop Table - hidden on mobile */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      #
+                    </th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      Tiêu đề
+                    </th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      Danh mục
+                    </th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      Trạng thái
+                    </th>
+                    <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      Ngày tạo
+                    </th>
+                    <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase">
+                      Hành động
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {news.map((item, idx) => (
+                    <tr key={item.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-500">{idx + 1}</td>
+                      <td className="px-6 py-4">
+                        <p className="font-medium text-gray-900 line-clamp-1">
+                          {item.title_vi || "Chưa có tiêu đề"}
+                          {item.source_url && (
+                            <a
+                              href={item.source_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-2 text-blue-400 hover:text-blue-600"
+                              title="Xem bài gốc"
+                            >
+                              🔗
+                            </a>
+                          )}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
+                          {CATEGORY_LABELS[item.category] || item.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                            item.status === "published"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {item.status === "published" ? "Đã đăng" : "Nháp"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        {new Date(item.created_at).toLocaleDateString("vi-VN")}
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-3">
+                        <Link
+                          href={`/admin/news/${item.id}/edit`}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          Sửa
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        >
+                          Xóa
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Cards - hidden on desktop */}
+            <div className="md:hidden divide-y divide-gray-100">
               {news.map((item, idx) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-500">{idx + 1}</td>
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-gray-900 line-clamp-1">
+                <div key={item.id} className="p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <p className="font-medium text-gray-900 text-sm flex-1 line-clamp-2">
+                      <span className="text-gray-400 mr-1.5">{idx + 1}.</span>
                       {item.title_vi || "Chưa có tiêu đề"}
                       {item.source_url && (
                         <a
                           href={item.source_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-2 text-blue-400 hover:text-blue-600"
-                          title="Xem bài gốc"
+                          className="ml-1 text-blue-400"
                         >
                           🔗
                         </a>
                       )}
                     </p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                      {CATEGORY_LABELS[item.category] || item.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
                     <span
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
                         item.status === "published"
                           ? "bg-green-100 text-green-700"
                           : "bg-yellow-100 text-yellow-700"
@@ -151,28 +206,33 @@ export default function AdminNewsPage() {
                     >
                       {item.status === "published" ? "Đã đăng" : "Nháp"}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {new Date(item.created_at).toLocaleDateString("vi-VN")}
-                  </td>
-                  <td className="px-6 py-4 text-right space-x-3">
-                    <Link
-                      href={`/admin/news/${item.id}/edit`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Sửa
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Xóa
-                    </button>
-                  </td>
-                </tr>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span className="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded font-medium">
+                        {CATEGORY_LABELS[item.category] || item.category}
+                      </span>
+                      <span>{new Date(item.created_at).toLocaleDateString("vi-VN")}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/admin/news/${item.id}/edit`}
+                        className="text-blue-600 text-sm font-medium"
+                      >
+                        Sửa
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="text-red-600 text-sm font-medium"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>
