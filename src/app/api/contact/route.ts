@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSettingValue } from "@/app/api/admin/settings/route";
 
 export async function POST(request: Request) {
   try {
@@ -53,23 +54,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Read settings for email
+    const emailNotifications = await getSettingValue("email_notifications").catch(() => "true");
+    const notifyEmail = await getSettingValue("contact_notify_email").catch(
+      () => "lixinvn.co.ltd@gmail.com"
+    );
+    const adminPhone = await getSettingValue("admin_phone").catch(() => "0395 536 768");
+
     // Send email notification to admin (non-blocking)
-    sendEmailNotification({
-      name,
-      phone,
-      email,
-      service,
-      date,
-      time,
-      notes,
-      locale: customerLocale,
-    }).catch((err) => console.error("[Contact] Admin email error:", err));
+    if (emailNotifications !== "false") {
+      sendEmailNotification({
+        name,
+        phone,
+        email,
+        service,
+        date,
+        time,
+        notes,
+        locale: customerLocale,
+        notifyEmail,
+      }).catch((err) => console.error("[Contact] Admin email error:", err));
+    }
 
     // Send confirmation email to customer (non-blocking)
     if (email) {
-      sendCustomerConfirmation({ name, email, service, date, time, locale: customerLocale }).catch(
-        (err) => console.error("[Contact] Customer email error:", err)
-      );
+      sendCustomerConfirmation({
+        name,
+        email,
+        service,
+        date,
+        time,
+        locale: customerLocale,
+        adminPhone,
+      }).catch((err) => console.error("[Contact] Customer email error:", err));
     }
 
     return NextResponse.json({ data, success: true }, { status: 201 });
@@ -87,6 +104,7 @@ async function sendEmailNotification(info: {
   time?: string;
   notes?: string;
   locale?: string;
+  notifyEmail?: string;
 }) {
   const LOCALE_LABELS: Record<string, string> = {
     vi: "🇻🇳 Tiếng Việt",
@@ -162,7 +180,7 @@ async function sendEmailNotification(info: {
     },
     body: JSON.stringify({
       from: "Lixin VN <noreply@lixinvn.com>",
-      to: ["lixinvn.co.ltd@gmail.com"],
+      to: [info.notifyEmail || "lixinvn.co.ltd@gmail.com"],
       subject,
       html,
     }),
@@ -183,6 +201,7 @@ async function sendCustomerConfirmation(info: {
   date?: string;
   time?: string;
   locale?: string;
+  adminPhone?: string;
 }) {
   const resendKey = process.env.RESEND_API_KEY;
   if (!resendKey) return;
@@ -331,7 +350,7 @@ async function sendCustomerConfirmation(info: {
         </p>
 
         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin: 16px 0;">
-          <p style="margin: 4px 0; font-size: 14px; color: #374151;">📞 Hotline / Zalo: <strong>0395 536 768</strong></p>
+          <p style="margin: 4px 0; font-size: 14px; color: #374151;">📞 Hotline / Zalo: <strong>${info.adminPhone || "0395 536 768"}</strong></p>
           <p style="margin: 4px 0; font-size: 14px; color: #374151;">📧 Email: <strong>lixinvn.co.ltd@gmail.com</strong></p>
           <p style="margin: 4px 0; font-size: 14px; color: #374151;">🌐 Website: <a href="https://lixinvn.com" style="color: #eab308; text-decoration: none; font-weight: bold;">lixinvn.com</a></p>
         </div>

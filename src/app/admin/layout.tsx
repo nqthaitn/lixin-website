@@ -62,6 +62,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: "📊 Tổng quan", path: "/admin" },
     { label: "📰 Tin tức", path: "/admin/news" },
     { label: "📞 Liên hệ", path: "/admin/contacts" },
+    { label: "⚙️ Cài đặt", path: "/admin/settings" },
     { label: "⬅️ Về trang chủ", path: "/vi" },
   ];
 

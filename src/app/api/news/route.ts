@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSettingValue } from "@/app/api/admin/settings/route";
 
 function slugify(text: string) {
   return text
@@ -98,7 +99,11 @@ export async function POST(request: Request) {
           excerpt_zh: excerpt_zh || "",
           category: category || "general",
           cover_image: cover_image || "",
-          status: status || "draft",
+          status:
+            status ||
+            ((await getSettingValue("auto_publish_news").catch(() => "false")) === "true"
+              ? "published"
+              : "draft"),
           source_url: source_url || null,
           author: session.user.email || "",
         },
