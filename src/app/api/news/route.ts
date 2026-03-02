@@ -99,6 +99,8 @@ export async function POST(request: Request) {
           excerpt_zh: excerpt_zh || "",
           category: category || "general",
           cover_image: cover_image || "",
+          // Admin explicitly sets status → use it as-is
+          // Cron/external doesn't send status → check auto_publish_news setting
           status:
             status ||
             ((await getSettingValue("auto_publish_news").catch(() => "false")) === "true"
