@@ -22,6 +22,22 @@ export async function generateMetadata({
   return {
     title: titles[locale] || titles.vi,
     description: descriptions[locale] || descriptions.vi,
+    openGraph: {
+      type: "website",
+      locale: locale === "vi" ? "vi_VN" : locale === "en" ? "en_US" : "zh_CN",
+      url: `https://lixinvn.com/${locale}/news`,
+      siteName: "Lixin Vietnam",
+      title: titles[locale] || titles.vi,
+      description: descriptions[locale] || descriptions.vi,
+    },
+    alternates: {
+      canonical: `https://lixinvn.com/${locale}/news`,
+      languages: {
+        vi: "https://lixinvn.com/vi/news",
+        en: "https://lixinvn.com/en/news",
+        zh: "https://lixinvn.com/zh/news",
+      },
+    },
   };
 }
 

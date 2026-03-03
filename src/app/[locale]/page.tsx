@@ -195,7 +195,7 @@ export default function HomePage() {
                   const categoryLabel = CATEGORY_LABELS[locale]?.[item.category] || item.category;
                   return (
                     <Link
-                      href={`/news/${item.id}` as "/news"}
+                      href={`/news/${item.slug || item.id}` as "/news"}
                       className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all group hover:border-yellow-300"
                     >
                       {item.cover_image && (
@@ -245,7 +245,7 @@ export default function HomePage() {
                   return (
                     <Link
                       key={item.id}
-                      href={`/news/${item.id}` as "/news"}
+                      href={`/news/${item.slug || item.id}` as "/news"}
                       className="flex-1 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all group hover:border-yellow-300"
                     >
                       <div className="flex items-center gap-3 mb-3">
