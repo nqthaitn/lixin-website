@@ -3,15 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
-import {
-  Calculator,
-  Receipt,
-  Building2,
-  ArrowRight,
-  ChevronLeft,
-  ChevronRight,
-  DollarSign,
-} from "lucide-react";
+import { Calculator, Receipt, Building2, ArrowRight, DollarSign } from "lucide-react";
 import { News } from "@/types/news";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
@@ -34,12 +26,11 @@ export default function HomePage() {
   ];
 
   const [newsItems, setNewsItems] = useState<News[]>([]);
-  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await fetch("/api/news?status=published&limit=6");
+        const res = await fetch("/api/news?status=published&limit=4");
         if (res.ok) {
           const { data } = await res.json();
           setNewsItems(data || []);
@@ -50,32 +41,6 @@ export default function HomePage() {
     };
     fetchNews();
   }, []);
-
-  const totalSlides = Math.max(1, Math.ceil(newsItems.length / 3));
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % totalSlides);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
-  };
-
-  useEffect(() => {
-    if (totalSlides <= 1) return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [totalSlides]);
-
-  const visibleNews = newsItems.slice(currentSlide * 3, currentSlide * 3 + 3);
-
-  const categoryColors: Record<string, string> = {
-    general: "bg-red-100 text-red-700",
-    accounting: "bg-blue-100 text-blue-700",
-    legal: "bg-purple-100 text-purple-700",
-  };
 
   return (
     <div className="pt-16">
@@ -197,110 +162,118 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* News Carousel — from Database */}
+      {/* Latest News — Featured Layout */}
       <section className="py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("news_title")}</h2>
-            <p className="mt-4 text-gray-600 text-lg">{t("news_subtitle")}</p>
+          <div className="flex items-end justify-between mb-12">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("news_title")}</h2>
+              <p className="mt-3 text-gray-500 text-lg">{t("news_subtitle")}</p>
+            </div>
+            <Link
+              href="/news"
+              className="hidden sm:inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors text-base"
+            >
+              {t("news_more")}
+              <ArrowRight className="ml-2" size={18} />
+            </Link>
           </div>
 
           {newsItems.length === 0 ? (
             <div className="text-center text-gray-500 py-8">{nt("no_news")}</div>
           ) : (
-            <div className="relative">
-              {totalSlides > 1 && (
-                <>
-                  <button
-                    onClick={prevSlide}
-                    className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-md hover:bg-yellow-50 hover:border-yellow-500 transition-colors"
-                    aria-label="Previous"
-                  >
-                    <ChevronLeft size={20} className="text-gray-600" />
-                  </button>
-                  <button
-                    onClick={nextSlide}
-                    className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-md hover:bg-yellow-50 hover:border-yellow-500 transition-colors"
-                    aria-label="Next"
-                  >
-                    <ChevronRight size={20} className="text-gray-600" />
-                  </button>
-                </>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 overflow-hidden">
-                {visibleNews.map((item) => {
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              {/* Featured (first article) */}
+              {newsItems[0] &&
+                (() => {
+                  const item = newsItems[0];
                   const title =
                     (item as unknown as Record<string, string>)[`title_${locale}`] || item.title_vi;
                   const excerpt =
                     (item as unknown as Record<string, string>)[`excerpt_${locale}`] ||
                     item.excerpt_vi;
                   const categoryLabel = CATEGORY_LABELS[locale]?.[item.category] || item.category;
-
                   return (
                     <Link
-                      key={item.id}
                       href={`/news/${item.id}` as "/news"}
-                      className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all group"
+                      className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all group hover:border-yellow-300"
                     >
-                      {item.cover_image ? (
-                        <div className="h-48 overflow-hidden">
+                      {item.cover_image && (
+                        <div className="h-56 overflow-hidden">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={item.cover_image}
                             alt={title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </div>
-                      ) : (
-                        <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400 text-4xl">📰</span>
-                        </div>
                       )}
-                      <div className="p-6">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span
-                            className={`text-xs font-medium px-2 py-1 rounded-full ${categoryColors[item.category] || "bg-gray-100 text-gray-700"}`}
-                          >
+                      <div className="p-7">
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-500 text-black">
                             {categoryLabel}
                           </span>
-                          <span className="text-sm text-gray-500">
+                          <span className="text-gray-400 text-sm">
                             {new Date(item.created_at).toLocaleDateString(
-                              locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN"
+                              locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN",
+                              { day: "numeric", month: "long", year: "numeric" }
                             )}
                           </span>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-yellow-600 transition-colors">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-tight">
                           {title}
                         </h3>
-                        <p className="text-gray-600 text-sm line-clamp-2">{excerpt}</p>
+                        <p className="text-gray-500 line-clamp-3 mb-4 leading-relaxed">{excerpt}</p>
+                        <span className="inline-flex items-center text-yellow-600 font-semibold group-hover:text-yellow-500 transition-colors">
+                          {nt("read_more")}
+                          <ArrowRight
+                            className="ml-2 group-hover:translate-x-1 transition-transform"
+                            size={16}
+                          />
+                        </span>
                       </div>
+                    </Link>
+                  );
+                })()}
+
+              {/* Side list (2nd-4th articles) */}
+              <div className="lg:col-span-2 flex flex-col gap-4">
+                {newsItems.slice(1, 4).map((item) => {
+                  const title =
+                    (item as unknown as Record<string, string>)[`title_${locale}`] || item.title_vi;
+                  const categoryLabel = CATEGORY_LABELS[locale]?.[item.category] || item.category;
+                  return (
+                    <Link
+                      key={item.id}
+                      href={`/news/${item.id}` as "/news"}
+                      className="flex-1 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all group hover:border-yellow-300"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                          {categoryLabel}
+                        </span>
+                        <span className="text-gray-400 text-xs">
+                          {new Date(item.created_at).toLocaleDateString(
+                            locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN",
+                            { day: "numeric", month: "short" }
+                          )}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-snug">
+                        {title}
+                      </h4>
                     </Link>
                   );
                 })}
               </div>
-
-              {totalSlides > 1 && (
-                <div className="flex justify-center gap-2 mt-8">
-                  {Array.from({ length: totalSlides }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setCurrentSlide(i)}
-                      className={`w-3 h-3 rounded-full transition-colors ${
-                        i === currentSlide ? "bg-yellow-500" : "bg-gray-300 hover:bg-gray-400"
-                      }`}
-                      aria-label={`Slide ${i + 1}`}
-                    />
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
-          <div className="text-center mt-10">
+          {/* Mobile: show "Xem tất cả" */}
+          <div className="text-center mt-8 sm:hidden">
             <Link
               href="/news"
-              className="inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors text-lg"
+              className="inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors"
             >
               {t("news_more")}
               <ArrowRight className="ml-2" size={18} />
