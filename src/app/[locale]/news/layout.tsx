@@ -36,6 +36,7 @@ export async function generateMetadata({
         vi: "https://lixinvn.com/vi/news",
         en: "https://lixinvn.com/en/news",
         zh: "https://lixinvn.com/zh/news",
+        "x-default": "https://lixinvn.com/vi/news",
       },
     },
   };

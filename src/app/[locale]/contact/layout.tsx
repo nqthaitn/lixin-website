@@ -22,6 +22,23 @@ export async function generateMetadata({
   return {
     title: titles[locale] || titles.vi,
     description: descriptions[locale] || descriptions.vi,
+    openGraph: {
+      type: "website",
+      locale: locale === "vi" ? "vi_VN" : locale === "en" ? "en_US" : "zh_CN",
+      url: `https://lixinvn.com/${locale}/contact`,
+      siteName: "Lixin Vietnam",
+      title: titles[locale] || titles.vi,
+      description: descriptions[locale] || descriptions.vi,
+    },
+    alternates: {
+      canonical: `https://lixinvn.com/${locale}/contact`,
+      languages: {
+        vi: "https://lixinvn.com/vi/contact",
+        en: "https://lixinvn.com/en/contact",
+        zh: "https://lixinvn.com/zh/contact",
+        "x-default": "https://lixinvn.com/vi/contact",
+      },
+    },
   };
 }
 

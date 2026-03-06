@@ -102,6 +102,7 @@ export async function generateMetadata({
         vi: "https://lixinvn.com/vi",
         en: "https://lixinvn.com/en",
         zh: "https://lixinvn.com/zh",
+        "x-default": "https://lixinvn.com/vi",
       },
     },
   };
