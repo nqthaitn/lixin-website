@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { Menu, X, Globe, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import GlobalSearch from "@/components/GlobalSearch";
 
 const locales = [
   { code: "vi" as const, label: "🇻🇳 Tiếng Việt" },
@@ -61,7 +62,10 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
+            {/* Global Search */}
+            <GlobalSearch />
+
             <div className="relative">
               <button
                 onClick={() => setLangOpen(!langOpen)}

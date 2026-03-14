@@ -19,19 +19,44 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limit = parseInt(searchParams.get("limit") || "12");
     const offset = (page - 1) * limit;
+    const category = searchParams.get("category");
+    const q = searchParams.get("q")?.trim();
+    const fromDate = searchParams.get("from");
+    const toDate = searchParams.get("to");
+    const sort = searchParams.get("sort") || "created_at";
+    const locale = searchParams.get("locale") || "vi";
 
     const supabase = await createClient();
+
+    const sortField = ["view_count", "like_count"].includes(sort) ? sort : "created_at";
 
     let query = supabase
       .from("news")
       .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
+      .order(sortField, { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (status && status !== "all") {
       query = query.eq("status", status);
+    }
+
+    if (category && category !== "all") {
+      query = query.eq("category", category);
+    }
+
+    if (q && q.length >= 2) {
+      const titleField = `title_${locale}`;
+      const excerptField = `excerpt_${locale}`;
+      query = query.or(`${titleField}.ilike.%${q}%,${excerptField}.ilike.%${q}%,tags.ilike.%${q}%`);
+    }
+
+    if (fromDate) {
+      query = query.gte("created_at", fromDate);
+    }
+    if (toDate) {
+      query = query.lte("created_at", toDate);
     }
 
     const { data, count, error } = await query;
@@ -40,7 +65,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ data, total: count }, { status: 200 });
+    const total = count || 0;
+    return NextResponse.json(
+      {
+        data,
+        total,
+        page,
+        limit,
+        hasMore: offset + limit < total,
+      },
+      { status: 200 }
+    );
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

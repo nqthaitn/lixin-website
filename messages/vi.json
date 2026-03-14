@@ -5,7 +5,8 @@
     "services": "Dịch vụ",
     "news": "Tin tức",
     "contact": "Liên hệ",
-    "booking": "Đặt lịch tư vấn"
+    "booking": "Đặt lịch tư vấn",
+    "search": "Tìm kiếm"
   },
   "home": {
     "hero_title": "Giải pháp Kế toán & Thuế",
@@ -118,7 +119,17 @@
     "not_found": "Không tìm thấy bài viết",
     "back_to_list": "Quay lại danh sách",
     "no_content": "Chưa có nội dung.",
-    "read_more": "Xem chi tiết"
+    "read_more": "Xem chi tiết",
+    "load_more": "Xem thêm",
+    "end_of_list": "Bạn đã xem hết tin tức",
+    "filter_all": "Tất cả",
+    "popular_articles": "Xem nhiều nhất",
+    "related_articles": "Bài viết liên quan",
+    "share": "Chia sẻ",
+    "copy_link": "Sao chép liên kết",
+    "copied": "Đã sao chép!",
+    "min_read": "phút đọc",
+    "source": "Nguồn bài gốc"
   },
   "contact": {
     "title": "Liên hệ",
@@ -150,5 +161,16 @@
     "label_email": "Email",
     "open_in_maps": "Mở trong Google Maps",
     "submitting": "Đang gửi..."
+  },
+  "search": {
+    "placeholder": "Tìm kiếm tin tức, dịch vụ...",
+    "title": "Tìm kiếm",
+    "no_results": "Không tìm thấy kết quả",
+    "try_different": "Thử với từ khóa khác",
+    "news_results": "Tin tức",
+    "service_results": "Dịch vụ",
+    "view_all": "Xem tất cả kết quả",
+    "recent": "Tìm kiếm gần đây",
+    "shortcut": "Ctrl+K"
   }
 }

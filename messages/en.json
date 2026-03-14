@@ -5,7 +5,8 @@
     "services": "Services",
     "news": "News",
     "contact": "Contact",
-    "booking": "Book Consultation"
+    "booking": "Book Consultation",
+    "search": "Search"
   },
   "home": {
     "hero_title": "Comprehensive Accounting & Tax",
@@ -118,7 +119,17 @@
     "not_found": "Article not found",
     "back_to_list": "Back to list",
     "no_content": "No content available.",
-    "read_more": "Read more"
+    "read_more": "Read more",
+    "load_more": "Load more",
+    "end_of_list": "You've reached the end",
+    "filter_all": "All",
+    "popular_articles": "Most viewed",
+    "related_articles": "Related articles",
+    "share": "Share",
+    "copy_link": "Copy link",
+    "copied": "Copied!",
+    "min_read": "min read",
+    "source": "Original source"
   },
   "contact": {
     "title": "Contact Us",
@@ -150,5 +161,16 @@
     "label_email": "Email",
     "open_in_maps": "Open in Google Maps",
     "submitting": "Submitting..."
+  },
+  "search": {
+    "placeholder": "Search news, services...",
+    "title": "Search",
+    "no_results": "No results found",
+    "try_different": "Try a different keyword",
+    "news_results": "News",
+    "service_results": "Services",
+    "view_all": "View all results",
+    "recent": "Recent searches",
+    "shortcut": "Ctrl+K"
   }
 }

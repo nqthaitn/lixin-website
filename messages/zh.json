@@ -5,7 +5,8 @@
     "services": "服务项目",
     "news": "新闻动态",
     "contact": "联系我们",
-    "booking": "预约咨询"
+    "booking": "预约咨询",
+    "search": "搜索"
   },
   "home": {
     "hero_title": "全面的会计与税务",
@@ -118,7 +119,17 @@
     "not_found": "未找到文章",
     "back_to_list": "返回列表",
     "no_content": "暂无内容。",
-    "read_more": "查看详情"
+    "read_more": "查看详情",
+    "load_more": "加载更多",
+    "end_of_list": "已经到底了",
+    "filter_all": "全部",
+    "popular_articles": "热门文章",
+    "related_articles": "相关文章",
+    "share": "分享",
+    "copy_link": "复制链接",
+    "copied": "已复制！",
+    "min_read": "分钟阅读",
+    "source": "原文来源"
   },
   "contact": {
     "title": "联系我们",
@@ -150,5 +161,16 @@
     "label_email": "电子邮件",
     "open_in_maps": "在Google地图中打开",
     "submitting": "提交中..."
+  },
+  "search": {
+    "placeholder": "搜索新闻、服务...",
+    "title": "搜索",
+    "no_results": "未找到结果",
+    "try_different": "请尝试其他关键词",
+    "news_results": "新闻",
+    "service_results": "服务",
+    "view_all": "查看所有结果",
+    "recent": "最近搜索",
+    "shortcut": "Ctrl+K"
   }
 }
