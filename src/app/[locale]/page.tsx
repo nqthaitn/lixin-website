@@ -5,6 +5,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Calculator, Receipt, Building2, ArrowRight, DollarSign } from "lucide-react";
 import { News } from "@/types/news";
+import { useScrollReveal, useStaggerReveal } from "@/hooks/useScrollReveal";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: { general: "Thuế", accounting: "Kế toán", legal: "Pháp lý" },
@@ -42,6 +44,13 @@ export default function HomePage() {
     fetchNews();
   }, []);
 
+  // Scroll reveal hooks for each section
+  const statsReveal = useScrollReveal<HTMLDivElement>();
+  const servicesReveal = useStaggerReveal<HTMLDivElement>();
+  const newsReveal = useScrollReveal<HTMLDivElement>();
+  const whyReveal = useScrollReveal<HTMLDivElement>();
+  const ctaReveal = useScrollReveal<HTMLDivElement>();
+
   return (
     <div className="pt-16">
       {/* Hero */}
@@ -52,13 +61,13 @@ export default function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 {t("hero_title")} <span className="text-yellow-500">{t("hero_highlight")}</span>
               </h1>
-              <p className="mt-6 text-lg sm:text-xl text-gray-400 leading-relaxed">
+              <p className="hero-subtitle mt-6 text-lg sm:text-xl text-gray-400 leading-relaxed">
                 {t("hero_subtitle")}
               </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+              <div className="hero-buttons mt-10 flex flex-col sm:flex-row gap-4">
                 <Link
                   href="/contact"
                   className="inline-flex items-center justify-center bg-yellow-500 text-black px-8 py-4 rounded-lg text-lg font-semibold hover:bg-yellow-400 transition-colors"
@@ -76,7 +85,7 @@ export default function HomePage() {
             </div>
 
             {/* Glass Card Dashboard */}
-            <div className="relative h-[400px] hidden lg:block">
+            <div className="hero-card relative h-[400px] hidden lg:block">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[400px] bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
                 <div className="flex gap-2 mb-6">
                   <div className="w-3 h-3 rounded-full bg-red-500" />
@@ -112,18 +121,27 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Stats — with counting animation */}
       <section className="bg-white py-16 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          ref={statsReveal.ref}
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${statsReveal.isVisible ? "is-visible" : ""}`}
+        >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {[
-              { value: "200+", label: t("stats_clients") },
-              { value: "7+", label: t("stats_years") },
-              { value: "9", label: t("stats_services") },
-              { value: "10+", label: t("stats_experts") },
+              { target: 200, suffix: "+", label: t("stats_clients") },
+              { target: 7, suffix: "+", label: t("stats_years") },
+              { target: 9, suffix: "", label: t("stats_services") },
+              { target: 10, suffix: "+", label: t("stats_experts") },
             ].map((stat) => (
               <div key={stat.label}>
-                <div className="text-3xl sm:text-4xl font-bold text-yellow-500">{stat.value}</div>
+                <AnimatedCounter
+                  target={stat.target}
+                  suffix={stat.suffix}
+                  isVisible={statsReveal.isVisible}
+                  duration={2000}
+                  className="text-3xl sm:text-4xl font-bold text-yellow-500"
+                />
                 <div className="mt-2 text-gray-600 text-sm sm:text-base">{stat.label}</div>
               </div>
             ))}
@@ -131,18 +149,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Services */}
+      {/* Featured Services — staggered reveal + enhanced hover */}
       <section className="py-20 sm:py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div
+            ref={servicesReveal.ref}
+            className={`text-center mb-16 scroll-reveal ${servicesReveal.isVisible ? "is-visible" : ""}`}
+          >
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("featured_title")}</h2>
             <p className="mt-4 text-gray-600 text-lg">{t("featured_subtitle")}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredServices.map(({ icon: Icon, titleKey, descKey }) => (
+            {featuredServices.map(({ icon: Icon, titleKey, descKey }, index) => (
               <div
                 key={titleKey}
-                className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-lg hover:border-yellow-500/50 transition-all group"
+                className={`service-card-enhanced bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 group stagger-item ${servicesReveal.isVisible ? "is-visible" : ""}`}
+                style={{
+                  transitionDelay: servicesReveal.isVisible ? `${index * 150}ms` : "0ms",
+                }}
               >
                 <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
                   <Icon size={28} className="text-yellow-600" />
@@ -154,7 +178,10 @@ export default function HomePage() {
                   className="inline-flex items-center text-yellow-600 font-medium hover:text-yellow-500 transition-colors"
                 >
                   {common("learn_more")}
-                  <ArrowRight className="ml-1" size={16} />
+                  <ArrowRight
+                    className="ml-1 group-hover:translate-x-1 transition-transform"
+                    size={16}
+                  />
                 </Link>
               </div>
             ))}
@@ -162,9 +189,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Latest News — Featured Layout */}
+      {/* Latest News — Featured Layout with scroll reveal */}
       <section className="py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          ref={newsReveal.ref}
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${newsReveal.isVisible ? "is-visible" : ""}`}
+        >
           <div className="flex items-end justify-between mb-12">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("news_title")}</h2>
@@ -284,7 +314,10 @@ export default function HomePage() {
 
       {/* Why Choose Lixin — Orbit Animation */}
       <section className="py-20 sm:py-24 bg-gray-950 text-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          ref={whyReveal.ref}
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${whyReveal.isVisible ? "is-visible" : ""}`}
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold">
@@ -293,19 +326,27 @@ export default function HomePage() {
               <p className="mt-4 text-gray-400 text-lg">{t("why_subtitle")}</p>
 
               <ul className="mt-8 space-y-6">
-                {(["why_feature_1", "why_feature_2", "why_feature_3"] as const).map((key) => (
-                  <li key={key} className="flex gap-4">
-                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 font-bold text-sm">
-                      ✓
-                    </div>
-                    <div>
-                      <strong className="text-white block mb-1">
-                        {t(`${key}_title` as const)}
-                      </strong>
-                      <span className="text-gray-400 text-sm">{t(`${key}_desc` as const)}</span>
-                    </div>
-                  </li>
-                ))}
+                {(["why_feature_1", "why_feature_2", "why_feature_3"] as const).map(
+                  (key, index) => (
+                    <li
+                      key={key}
+                      className={`flex gap-4 stagger-item ${whyReveal.isVisible ? "is-visible" : ""}`}
+                      style={{
+                        transitionDelay: whyReveal.isVisible ? `${300 + index * 150}ms` : "0ms",
+                      }}
+                    >
+                      <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 font-bold text-sm">
+                        ✓
+                      </div>
+                      <div>
+                        <strong className="text-white block mb-1">
+                          {t(`${key}_title` as const)}
+                        </strong>
+                        <span className="text-gray-400 text-sm">{t(`${key}_desc` as const)}</span>
+                      </div>
+                    </li>
+                  )
+                )}
               </ul>
             </div>
 
@@ -335,14 +376,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA — with scroll reveal + pulse button */}
       <section className="bg-yellow-500 py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div
+          ref={ctaReveal.ref}
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center scroll-reveal ${ctaReveal.isVisible ? "is-visible" : ""}`}
+        >
           <h2 className="text-3xl sm:text-4xl font-bold text-black">{t("cta_title")}</h2>
           <p className="mt-4 text-black/70 text-lg max-w-2xl mx-auto">{t("cta_subtitle")}</p>
           <Link
             href="/contact"
-            className="mt-8 inline-flex items-center bg-black text-yellow-500 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-900 transition-colors"
+            className="cta-button-pulse mt-8 inline-flex items-center bg-black text-yellow-500 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-900 transition-colors"
           >
             {t("cta_button")}
             <ArrowRight className="ml-2" size={20} />

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "@/i18n/routing";
 import { News } from "@/types/news";
 import { ArrowRight, Clock, Newspaper, Loader2, ChevronDown, Eye, TrendingUp } from "lucide-react";
+import { useScrollReveal, useStaggerReveal } from "@/hooks/useScrollReveal";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: {
@@ -177,6 +178,9 @@ export default function NewsPageClient({
   const highlightNews = news[0];
   const restNews = news.slice(1);
 
+  const newsGridReveal = useStaggerReveal<HTMLDivElement>();
+  const sidebarReveal = useScrollReveal<HTMLDivElement>();
+
   return (
     <>
       {/* Hero */}
@@ -186,10 +190,12 @@ export default function NewsPageClient({
           <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-yellow-500/5 rounded-full blur-3xl" />
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
+          <h1 className="hero-title text-4xl sm:text-5xl font-bold text-white mb-4 tracking-tight">
             {translations.title}
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">{translations.subtitle}</p>
+          <p className="hero-subtitle text-gray-400 text-lg max-w-2xl mx-auto">
+            {translations.subtitle}
+          </p>
           {initialQuery && (
             <p className="text-yellow-500 text-sm mt-3">
               {locale === "vi"
@@ -311,12 +317,15 @@ export default function NewsPageClient({
                   )}
 
                   {/* Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {restNews.map((item) => (
+                  <div ref={newsGridReveal.ref} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {restNews.map((item, index) => (
                       <Link
                         key={item.id}
                         href={`/news/${item.slug || item.id}` as "/news"}
-                        className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group hover:-translate-y-0.5 hover:border-yellow-300"
+                        className={`bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group hover:-translate-y-0.5 hover:border-yellow-300 stagger-item ${newsGridReveal.isVisible ? "is-visible" : ""}`}
+                        style={{
+                          transitionDelay: newsGridReveal.isVisible ? `${index * 100}ms` : "0ms",
+                        }}
                       >
                         <article>
                           {item.cover_image && (
@@ -390,7 +399,11 @@ export default function NewsPageClient({
 
             {/* Sidebar — Popular articles */}
             <aside className="w-full lg:w-80 flex-shrink-0">
-              <div className="lg:sticky lg:top-32">
+              <div
+                ref={sidebarReveal.ref}
+                className={`lg:sticky lg:top-32 scroll-reveal ${sidebarReveal.isVisible ? "is-visible" : ""}`}
+                style={{ transitionDelay: "300ms" }}
+              >
                 <div className="bg-white rounded-2xl border border-gray-200 p-6">
                   <h3 className="text-base font-bold text-gray-900 mb-5 flex items-center gap-2">
                     <TrendingUp size={18} className="text-yellow-500" />
