@@ -16,27 +16,40 @@ export default async function NewsPage({ searchParams }: PageProps) {
 
   const supabase = await createClient();
 
-  let dbQuery = supabase
-    .from("news")
-    .select("*", { count: "exact" })
-    .eq("status", "published")
-    .order("created_at", { ascending: false })
-    .range(0, 11); // first 12 items
-
-  if (category && category !== "all") {
-    dbQuery = dbQuery.eq("category", category);
-  }
+  let news: News[] = [];
+  let totalCount = 0;
 
   if (query && query.length >= 2) {
-    const titleField = `title_${locale}`;
-    const excerptField = `excerpt_${locale}`;
-    dbQuery = dbQuery.or(
-      `${titleField}.ilike.%${query}%,${excerptField}.ilike.%${query}%,tags.ilike.%${query}%`
-    );
-  }
+    // Use FTS RPC for search
+    const { data: ftsData } = await supabase.rpc("search_news", {
+      search_query: query,
+      search_locale: locale,
+      search_status: "published",
+      search_category: category && category !== "all" ? category : null,
+      search_limit: 12,
+      search_offset: 0,
+    });
+    news = (ftsData || []).map(
+      ({ rank, total_count, ...rest }: Record<string, unknown>) => rest
+    ) as News[];
+    totalCount = (ftsData?.[0]?.total_count as number) || 0;
+  } else {
+    // Regular browse query
+    let dbQuery = supabase
+      .from("news")
+      .select("*", { count: "exact" })
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .range(0, 11);
 
-  const { data, count } = await dbQuery;
-  const news: News[] = data || [];
+    if (category && category !== "all") {
+      dbQuery = dbQuery.eq("category", category);
+    }
+
+    const { data, count } = await dbQuery;
+    news = (data || []) as News[];
+    totalCount = count || 0;
+  }
 
   const translations = {
     title: t("title"),
@@ -54,7 +67,7 @@ export default async function NewsPage({ searchParams }: PageProps) {
     <div className="pt-16">
       <NewsPageClient
         initialNews={news}
-        totalCount={count || 0}
+        totalCount={totalCount}
         locale={locale}
         initialCategory={category}
         initialQuery={query}

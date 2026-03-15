@@ -30,6 +30,40 @@ export async function GET(request: Request) {
 
     const supabase = await createClient();
 
+    // Use FTS RPC when search query is present
+    if (q && q.length >= 2) {
+      const { data: ftsData, error: ftsError } = await supabase.rpc("search_news", {
+        search_query: q,
+        search_locale: locale,
+        search_status: status && status !== "all" ? status : "published",
+        search_category: category && category !== "all" ? category : null,
+        search_limit: limit,
+        search_offset: offset,
+      });
+
+      if (ftsError) {
+        return NextResponse.json({ error: ftsError.message }, { status: 500 });
+      }
+
+      const total = ftsData?.[0]?.total_count || 0;
+      // Remove rank and total_count from response data
+      const data = (ftsData || []).map(
+        ({ rank, total_count, ...rest }: Record<string, unknown>) => rest
+      );
+
+      return NextResponse.json(
+        {
+          data,
+          total,
+          page,
+          limit,
+          hasMore: offset + limit < total,
+        },
+        { status: 200 }
+      );
+    }
+
+    // Regular query (no search) — browse/filter mode
     const sortField = ["view_count", "like_count"].includes(sort) ? sort : "created_at";
 
     let query = supabase
@@ -44,12 +78,6 @@ export async function GET(request: Request) {
 
     if (category && category !== "all") {
       query = query.eq("category", category);
-    }
-
-    if (q && q.length >= 2) {
-      const titleField = `title_${locale}`;
-      const excerptField = `excerpt_${locale}`;
-      query = query.or(`${titleField}.ilike.%${q}%,${excerptField}.ilike.%${q}%,tags.ilike.%${q}%`);
     }
 
     if (fromDate) {

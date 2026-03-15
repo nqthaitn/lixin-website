@@ -13,25 +13,29 @@ export async function GET(request: Request) {
     }
 
     const supabase = await createClient();
+
+    // Use FTS RPC function for news search
+    const { data: newsData, error: newsError } = await supabase.rpc("search_news", {
+      search_query: q,
+      search_locale: locale,
+      search_status: "published",
+      search_category: null,
+      search_limit: limit,
+      search_offset: 0,
+    });
+
+    if (newsError) {
+      console.error("FTS search error:", newsError);
+    }
+
     const titleField = `title_${locale}`;
     const excerptField = `excerpt_${locale}`;
 
-    // Search news by title and excerpt in the current locale
-    const { data: newsData } = await supabase
-      .from("news")
-      .select(
-        "id, slug, title_vi, title_en, title_zh, excerpt_vi, excerpt_en, excerpt_zh, category, cover_image, created_at"
-      )
-      .eq("status", "published")
-      .or(`${titleField}.ilike.%${q}%,${excerptField}.ilike.%${q}%,tags.ilike.%${q}%`)
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    const news = (newsData || []).map((item) => ({
+    const news = (newsData || []).map((item: Record<string, unknown>) => ({
       id: item.id,
       slug: item.slug,
-      title: ((item as Record<string, unknown>)[titleField] as string) || item.title_vi,
-      excerpt: ((item as Record<string, unknown>)[excerptField] as string) || item.excerpt_vi,
+      title: (item[titleField] as string) || (item.title_vi as string),
+      excerpt: (item[excerptField] as string) || (item.excerpt_vi as string),
       category: item.category,
       cover_image: item.cover_image,
       created_at: item.created_at,
