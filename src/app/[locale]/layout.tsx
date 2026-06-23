@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+
+// Pre-render all locales at build time so these pages can be served as
+// static/ISR HTML (edge-cached) instead of being dynamically rendered per request.
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 import { Inter } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -117,6 +123,8 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   if (!routing.locales.includes(locale as "vi" | "en" | "zh")) notFound();
+  // Enable static rendering for next-intl (must run before any i18n call).
+  setRequestLocale(locale);
   const messages = await getMessages();
 
   return (

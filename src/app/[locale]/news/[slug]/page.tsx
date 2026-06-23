@@ -1,9 +1,29 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getNewsArticle, getRelatedArticles } from "@/lib/news";
+import { supabasePublic } from "@/lib/supabase/public";
+import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
+
+// ISR: article pages are pre-rendered and refreshed at most every 5 min;
+// admin edits flush them instantly via revalidateTag("news").
+export const revalidate = 300;
+
+// Pre-build the most recent published articles for each locale; any other slug
+// is rendered on first request and then cached (dynamicParams defaults to true).
+export async function generateStaticParams() {
+  const { data } = await supabasePublic
+    .from("news")
+    .select("slug")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  const slugs = (data || []).map((n) => n.slug).filter(Boolean);
+  return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
+}
 import { ArrowLeft, Calendar, Tag, Eye, Clock, ExternalLink, ArrowRight } from "lucide-react";
 import ShareButtons from "@/components/news/ShareButtons";
 import ReadingProgress from "@/components/news/ReadingProgress";
@@ -89,8 +109,8 @@ export default async function NewsDetailPage({
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { slug } = await params;
-  const locale = await getLocale();
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("news");
 
   const news = await getNewsArticle(slug);
