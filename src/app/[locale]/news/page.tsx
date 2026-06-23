@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@/lib/supabase/server";
+import { supabasePublic } from "@/lib/supabase/public";
+import { getNewsList } from "@/lib/news";
 import { News } from "@/types/news";
 import NewsPageClient from "@/components/news/NewsPageClient";
 
@@ -14,14 +15,12 @@ export default async function NewsPage({ searchParams }: PageProps) {
   const query = params.q || "";
   const category = params.category || "all";
 
-  const supabase = await createClient();
-
   let news: News[] = [];
   let totalCount = 0;
 
   if (query && query.length >= 2) {
-    // Use FTS RPC for search
-    const { data: ftsData } = await supabase.rpc("search_news", {
+    // Search is per-query and not cached — use the cookie-less public client
+    const { data: ftsData } = await supabasePublic.rpc("search_news", {
       search_query: query,
       search_locale: locale,
       search_status: "published",
@@ -34,21 +33,10 @@ export default async function NewsPage({ searchParams }: PageProps) {
     ) as News[];
     totalCount = (ftsData?.[0]?.total_count as number) || 0;
   } else {
-    // Regular browse query
-    let dbQuery = supabase
-      .from("news")
-      .select("*", { count: "exact" })
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .range(0, 11);
-
-    if (category && category !== "all") {
-      dbQuery = dbQuery.eq("category", category);
-    }
-
-    const { data, count } = await dbQuery;
-    news = (data || []) as News[];
-    totalCount = count || 0;
+    // Regular browse — served from the cached helper (shared across visitors)
+    const result = await getNewsList(category, 12);
+    news = result.news;
+    totalCount = result.total;
   }
 
   const translations = {

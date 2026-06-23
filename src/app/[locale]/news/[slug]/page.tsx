@@ -1,7 +1,8 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
-import { createClient } from "@/lib/supabase/server";
+import { getNewsArticle, getRelatedArticles } from "@/lib/news";
 import { Link } from "@/i18n/routing";
 import { ArrowLeft, Calendar, Tag, Eye, Clock, ExternalLink, ArrowRight } from "lucide-react";
 import ShareButtons from "@/components/news/ShareButtons";
@@ -34,39 +35,6 @@ const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   },
 };
 
-async function getNewsArticle(slug: string) {
-  const supabase = await createClient();
-  let { data } = await supabase
-    .from("news")
-    .select("*")
-    .eq("slug", slug)
-    .eq("status", "published")
-    .single();
-  if (!data) {
-    const idResult = await supabase
-      .from("news")
-      .select("*")
-      .eq("id", slug)
-      .eq("status", "published")
-      .single();
-    data = idResult.data;
-  }
-  return data;
-}
-
-async function getRelatedArticles(category: string, excludeId: number) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("news")
-    .select("id, slug, title_vi, title_en, title_zh, cover_image, category, created_at, view_count")
-    .eq("status", "published")
-    .eq("category", category)
-    .neq("id", excludeId)
-    .order("created_at", { ascending: false })
-    .limit(3);
-  return data || [];
-}
-
 function estimateReadTime(content: string) {
   const words = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
   return Math.max(1, Math.ceil(words / 200));
@@ -82,9 +50,10 @@ export async function generateMetadata({
 
   if (!news) return { title: "Not Found" };
 
-  const title = news[`title_${locale}`] || news.title_vi;
+  const field = (k: string) => (news as unknown as Record<string, string>)[k];
+  const title = field(`title_${locale}`) || news.title_vi;
   const description =
-    news[`meta_desc_${locale}`] || news[`excerpt_${locale}`] || news.excerpt_vi || "";
+    field(`meta_desc_${locale}`) || field(`excerpt_${locale}`) || news.excerpt_vi || "";
 
   return {
     title,
@@ -127,9 +96,10 @@ export default async function NewsDetailPage({
   const news = await getNewsArticle(slug);
   if (!news) notFound();
 
-  const title = news[`title_${locale}`] || news.title_vi;
-  const content = news[`content_${locale}`] || news.content_vi;
-  const excerpt = news[`excerpt_${locale}`] || news.excerpt_vi;
+  const field = (k: string) => (news as unknown as Record<string, string>)[k];
+  const title = field(`title_${locale}`) || news.title_vi;
+  const content = field(`content_${locale}`) || news.content_vi;
+  const excerpt = field(`excerpt_${locale}`) || news.excerpt_vi;
   const categoryLabel = CATEGORY_LABELS[locale]?.[news.category] || news.category;
   const readTime = estimateReadTime(content || "");
   const articleUrl = `https://lixinvn.com/${locale}/news/${news.slug}`;
@@ -251,8 +221,15 @@ export default async function NewsDetailPage({
 
         {news.cover_image && (
           <div className="mb-8 rounded-xl overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={news.cover_image} alt={title} className="w-full h-auto" />
+            <Image
+              src={news.cover_image}
+              alt={title}
+              width={1200}
+              height={630}
+              className="w-full h-auto"
+              priority
+              sizes="(max-width: 768px) 100vw, 768px"
+            />
           </div>
         )}
 
@@ -323,12 +300,13 @@ export default async function NewsDetailPage({
                     className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group hover:-translate-y-0.5 hover:border-yellow-300"
                   >
                     {item.cover_image && (
-                      <div className="h-40 overflow-hidden">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
+                      <div className="relative h-40 overflow-hidden">
+                        <Image
                           src={item.cover_image}
                           alt={itemTitle}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
                     )}

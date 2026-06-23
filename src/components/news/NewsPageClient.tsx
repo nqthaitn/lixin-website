@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { News } from "@/types/news";
 import { ArrowRight, Clock, Newspaper, Loader2, ChevronDown, Eye, TrendingUp } from "lucide-react";
@@ -262,12 +263,14 @@ export default function NewsPageClient({
                       <article className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-yellow-300">
                         <div className="grid grid-cols-1 lg:grid-cols-5">
                           {highlightNews.cover_image && (
-                            <div className="lg:col-span-2 h-56 lg:h-auto overflow-hidden">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
+                            <div className="relative lg:col-span-2 h-56 lg:h-auto min-h-56 overflow-hidden">
+                              <Image
                                 src={highlightNews.cover_image}
                                 alt={getField(highlightNews, "title", locale)}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 40vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                priority
                               />
                             </div>
                           )}
@@ -329,12 +332,13 @@ export default function NewsPageClient({
                       >
                         <article>
                           {item.cover_image && (
-                            <div className="h-44 overflow-hidden">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
+                            <div className="relative h-44 overflow-hidden">
+                              <Image
                                 src={item.cover_image}
                                 alt={getField(item, "title", locale)}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
                               />
                             </div>
                           )}
@@ -431,10 +435,11 @@ export default function NewsPageClient({
                         >
                           <div className="relative flex-shrink-0">
                             {item.cover_image ? (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
+                              <Image
                                 src={item.cover_image}
                                 alt=""
+                                width={64}
+                                height={64}
                                 className="w-16 h-16 rounded-lg object-cover"
                               />
                             ) : (

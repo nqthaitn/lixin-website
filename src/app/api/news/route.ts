@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { supabasePublic } from "@/lib/supabase/public";
 import { getSettingValue } from "@/app/api/admin/settings/route";
+
+// Cache published-news browse responses at the CDN/edge for 5 min,
+// serving stale while revalidating for a smoother experience.
+const PUBLIC_CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+};
 
 function slugify(text: string) {
   return text
@@ -28,7 +36,11 @@ export async function GET(request: Request) {
     const sort = searchParams.get("sort") || "created_at";
     const locale = searchParams.get("locale") || "vi";
 
-    const supabase = await createClient();
+    // Public browse (published only) uses the cookie-less client so responses
+    // can be CDN-cached. Admin queries (status=all/draft) keep the cookie client
+    // so RLS/session still applies.
+    const isPublic = !status || status === "published";
+    const supabase = isPublic ? supabasePublic : await createClient();
 
     // Use FTS RPC when search query is present
     if (q && q.length >= 2) {
@@ -59,7 +71,7 @@ export async function GET(request: Request) {
           limit,
           hasMore: offset + limit < total,
         },
-        { status: 200 }
+        { status: 200, headers: isPublic ? PUBLIC_CACHE_HEADERS : undefined }
       );
     }
 
@@ -102,7 +114,7 @@ export async function GET(request: Request) {
         limit,
         hasMore: offset + limit < total,
       },
-      { status: 200 }
+      { status: 200, headers: isPublic ? PUBLIC_CACHE_HEADERS : undefined }
     );
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -179,6 +191,9 @@ export async function POST(request: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Flush cached public news reads so the new article shows up immediately.
+    revalidateTag("news", "max");
 
     return NextResponse.json({ data }, { status: 201 });
   } catch {

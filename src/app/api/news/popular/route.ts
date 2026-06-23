@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getPopularNews } from "@/lib/news";
 
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("news")
-      .select(
-        "id, slug, title_vi, title_en, title_zh, cover_image, view_count, created_at, category"
-      )
-      .eq("status", "published")
-      .order("view_count", { ascending: false })
-      .limit(5);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ data: data || [] });
+    const data = await getPopularNews(5);
+    return NextResponse.json(
+      { data },
+      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
+    );
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

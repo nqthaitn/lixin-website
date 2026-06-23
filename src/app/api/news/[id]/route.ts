@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -46,6 +47,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    revalidateTag("news", "max");
+
     return NextResponse.json({ data }, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -73,6 +76,8 @@ export async function DELETE(
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidateTag("news", "max");
 
     return NextResponse.json({ success: true }, { status: 200 });
   } catch {
