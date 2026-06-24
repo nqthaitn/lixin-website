@@ -6,6 +6,17 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
   try {
     const { id } = await params;
     const supabase = await createClient();
+
+    // Admin-only: this endpoint returns any article (including drafts), so it
+    // must require an authenticated session. Public reads go through the
+    // published-only helpers in lib/news.ts.
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { data, error } = await supabase.from("news").select("*").eq("id", id).single();
 
     if (error) {

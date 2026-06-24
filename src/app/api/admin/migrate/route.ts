@@ -4,10 +4,16 @@ import { createClient } from "@supabase/supabase-js";
 // This endpoint is only accessible in development for DB migration
 // POST /api/admin/migrate
 export async function POST(request: Request) {
-  // Security: only allow from local or with secret header
+  // This is a dev-only DB check/seed tool that runs with the service-role key
+  // (bypasses RLS). Never expose it in production.
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Require an explicitly-configured secret — no guessable fallback.
+  const secret = process.env.MIGRATE_SECRET;
   const authHeader = request.headers.get("x-migrate-secret");
-  const secret = process.env.MIGRATE_SECRET || "lixin-migrate-2026";
-  if (authHeader !== secret) {
+  if (!secret || authHeader !== secret) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
