@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { supabasePublic } from "@/lib/supabase/public";
 import { requireUser } from "@/lib/auth";
 import { getSettingValue } from "@/lib/settings";
+import { newsListQuery } from "@/lib/news";
 
 // Cache published-news browse responses at the CDN/edge for 5 min,
 // serving stale while revalidating for a smoother experience.
@@ -76,31 +77,17 @@ export async function GET(request: Request) {
       );
     }
 
-    // Regular query (no search) — browse/filter mode
-    const sortField = ["view_count", "like_count"].includes(sort) ? sort : "created_at";
-
-    let query = supabase
-      .from("news")
-      .select("*", { count: "exact" })
-      .order(sortField, { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (status && status !== "all") {
-      query = query.eq("status", status);
-    }
-
-    if (category && category !== "all") {
-      query = query.eq("category", category);
-    }
-
-    if (fromDate) {
-      query = query.gte("created_at", fromDate);
-    }
-    if (toDate) {
-      query = query.lte("created_at", toDate);
-    }
-
-    const { data, count, error } = await query;
+    // Regular query (no search) — browse/filter mode. Shares the list-query
+    // builder with the cached SSR helpers in lib/news.ts.
+    const { data, count, error } = await newsListQuery(supabase, {
+      status,
+      category,
+      sort,
+      fromDate,
+      toDate,
+      offset,
+      limit,
+    });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

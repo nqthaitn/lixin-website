@@ -1,6 +1,41 @@
 import { unstable_cache } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabasePublic } from "@/lib/supabase/public";
 import { News } from "@/types/news";
+
+export type NewsListOptions = {
+  status?: string | null; // "published" | "draft" | "all"
+  category?: string | null;
+  sort?: string | null; // created_at | view_count | like_count
+  fromDate?: string | null;
+  toDate?: string | null;
+  offset?: number;
+  limit?: number;
+};
+
+/**
+ * Single source of truth for the news-list query (filter + sort + paginate).
+ * Used by the cached SSR helpers below and by GET /api/news so the browse
+ * logic lives in one place. Pass whichever Supabase client fits the caller:
+ * `supabasePublic` for public reads, the cookie client for admin.
+ */
+export function newsListQuery(client: SupabaseClient, opts: NewsListOptions = {}) {
+  const { status, category, sort, fromDate, toDate, offset = 0, limit = 12 } = opts;
+  const sortField = sort && ["view_count", "like_count"].includes(sort) ? sort : "created_at";
+
+  let query = client
+    .from("news")
+    .select("*", { count: "exact" })
+    .order(sortField, { ascending: false })
+    .range(offset, offset + limit - 1);
+
+  if (status && status !== "all") query = query.eq("status", status);
+  if (category && category !== "all") query = query.eq("category", category);
+  if (fromDate) query = query.gte("created_at", fromDate);
+  if (toDate) query = query.lte("created_at", toDate);
+
+  return query;
+}
 
 /**
  * Cached read helpers for PUBLIC (published) news.
@@ -29,18 +64,11 @@ export const getLatestNews = unstable_cache(
 
 export const getNewsList = unstable_cache(
   async (category = "all", limit = 12): Promise<{ news: News[]; total: number }> => {
-    let query = supabasePublic
-      .from("news")
-      .select("*", { count: "exact" })
-      .eq("status", "published")
-      .order("created_at", { ascending: false })
-      .range(0, limit - 1);
-
-    if (category && category !== "all") {
-      query = query.eq("category", category);
-    }
-
-    const { data, count } = await query;
+    const { data, count } = await newsListQuery(supabasePublic, {
+      status: "published",
+      category,
+      limit,
+    });
     return { news: (data || []) as News[], total: count || 0 };
   },
   ["news-list"],
