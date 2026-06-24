@@ -1,6 +1,9 @@
 # ARCHITECTURE DOCUMENT — WEBSITE LIXIN VN
-> Ngày tạo: 14/03/2026
-> Phiên bản: v1.0 (đồng bộ với REQUIREMENTS v1.8)
+> Ngày tạo: 14/03/2026 · Cập nhật: 24/06/2026
+> Phiên bản: v1.1 (đồng bộ với REQUIREMENTS v1.8 — news page v1.8 đã triển khai)
+
+> **Lưu ý:** §3 mô tả flow CŨ (trước v1.8) để lưu vết; các vấn đề `.limit(30)`,
+> thiếu pagination/search đã được xử lý. Flow hiện tại theo §4.
 
 ---
 
@@ -9,7 +12,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        FRONTEND                             │
-│              Next.js 14 (App Router) + TypeScript            │
+│              Next.js 16 (App Router) + TypeScript            │
 │        Tailwind CSS + Lucide React + next-intl (i18n)       │
 ├──────────────┬──────────────┬─────────────┬─────────────────┤
 │  Public Site │  Admin Panel │   API       │  AI Agent       │
@@ -64,8 +67,15 @@ src/
 │   ├── ZaloChat.tsx           # Floating Zalo chat button
 │   └── admin/                 # Admin-specific components
 ├── i18n/                      # Internationalization config
+├── hooks/                     # Client hooks (useScrollReveal, ...)
 ├── lib/
-│   └── supabase/              # Supabase client (server + browser)
+│   ├── news.ts                # News reads: cached SSR helpers + newsListQuery (single source)
+│   ├── auth.ts                # requireUser() — server-side authz (getUser, validates JWT)
+│   ├── settings.ts            # site_settings defaults + getSettingValue
+│   └── supabase/
+│       ├── server.ts          # Cookie client (auth-gated routes/SSR)
+│       ├── public.ts          # Cookie-less anon client (cacheable public reads)
+│       └── client.ts          # Browser client
 └── types/
     └── news.ts                # News interface định nghĩa
 ```
@@ -291,7 +301,7 @@ CREATE INDEX idx_news_view_count ON news(view_count DESC) WHERE status = 'publis
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 14 (App Router) + TypeScript |
+| Framework | Next.js 16 (App Router) + TypeScript |
 | Styling | Tailwind CSS |
 | i18n | next-intl (vi/en/zh) |
 | Icons | Lucide React |
@@ -310,5 +320,10 @@ CREATE INDEX idx_news_view_count ON news(view_count DESC) WHERE status = 'publis
 | Document | Version | Ngày cập nhật |
 |----------|---------|---------------|
 | REQUIREMENTS | v1.8 | 14/03/2026 |
-| ARCHITECTURE | v1.0 | 14/03/2026 |
-| Source Code | Phase 2 done | — |
+| ARCHITECTURE | v1.1 | 24/06/2026 |
+| Source Code | News v1.8 triển khai + perf (SSG/ISR/cache) | 24/06/2026 |
+
+### Authz & data-access (cập nhật 24/06/2026)
+- Authz phía server qua `requireUser()` (dùng `getUser`, validate JWT) — không dùng `getSession` để gate.
+- Admin pages được middleware chặn server-side (redirect `/admin/login` nếu chưa đăng nhập).
+- News reads tập trung ở `lib/news.ts` (`newsListQuery`); public reads dùng `supabasePublic` (cacheable).
