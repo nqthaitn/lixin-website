@@ -19,13 +19,15 @@ export const revalidate = 86400; // 1 day
 export async function generateStaticParams() {
   const { data } = await supabasePublic
     .from("news")
-    .select("slug")
+    .select("id, slug")
     .eq("status", "published")
     .order("created_at", { ascending: false })
     .limit(1000);
 
-  const slugs = (data || []).map((n) => n.slug).filter(Boolean);
-  return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
+  // URLs use the slug when present, otherwise the numeric id (current data has
+  // null slugs, so links resolve to /news/{id}).
+  const params = (data || []).map((n) => n.slug || String(n.id)).filter(Boolean);
+  return routing.locales.flatMap((locale) => params.map((slug) => ({ locale, slug })));
 }
 import { ArrowLeft, Calendar, Tag, Eye, Clock, ExternalLink, ArrowRight } from "lucide-react";
 import ShareButtons from "@/components/news/ShareButtons";

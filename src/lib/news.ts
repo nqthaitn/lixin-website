@@ -64,23 +64,31 @@ export const getPopularNews = unstable_cache(
 );
 
 export const getNewsArticle = unstable_cache(
-  async (slug: string): Promise<News | null> => {
-    let { data } = await supabasePublic
-      .from("news")
-      .select("*")
-      .eq("slug", slug)
-      .eq("status", "published")
-      .single();
-    if (!data) {
-      const idResult = await supabasePublic
+  async (slugOrId: string): Promise<News | null> => {
+    // URLs are either a text slug or a numeric id. Query the matching column
+    // directly (one round-trip) and only fall back if needed. Never query `id`
+    // with a non-numeric value (Postgres would fail the int cast).
+    const isNumericId = /^\d+$/.test(slugOrId);
+
+    let data: News | null = null;
+    if (!isNumericId) {
+      const r = await supabasePublic
         .from("news")
         .select("*")
-        .eq("id", slug)
+        .eq("slug", slugOrId)
         .eq("status", "published")
-        .single();
-      data = idResult.data;
+        .maybeSingle();
+      data = (r.data as News) || null;
+    } else {
+      const r = await supabasePublic
+        .from("news")
+        .select("*")
+        .eq("id", slugOrId)
+        .eq("status", "published")
+        .maybeSingle();
+      data = (r.data as News) || null;
     }
-    return (data as News) || null;
+    return data;
   },
   ["news-article"],
   { revalidate: REVALIDATE_SECONDS, tags: [NEWS_TAG] }
