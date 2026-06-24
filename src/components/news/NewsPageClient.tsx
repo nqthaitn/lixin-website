@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { News } from "@/types/news";
@@ -61,8 +62,6 @@ interface NewsPageClientProps {
   initialNews: News[];
   totalCount: number;
   locale: string;
-  initialCategory?: string;
-  initialQuery?: string;
   translations: {
     title: string;
     subtitle: string;
@@ -80,15 +79,19 @@ export default function NewsPageClient({
   initialNews,
   totalCount,
   locale,
-  initialCategory = "all",
-  initialQuery = "",
   translations,
 }: NewsPageClientProps) {
+  // The page is statically rendered; the active search/category come from the URL
+  // and are resolved on the client so the default list stays edge-cached.
+  const searchParams = useSearchParams();
+  const urlQuery = searchParams.get("q") || "";
+  const urlCategory = searchParams.get("category") || "all";
+
   const [news, setNews] = useState<News[]>(initialNews);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(initialNews.length < totalCount);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedCategory, setSelectedCategory] = useState(urlCategory);
   const [popularNews, setPopularNews] = useState<News[]>([]);
   const loaderRef = useRef<HTMLDivElement>(null);
 
@@ -102,7 +105,47 @@ export default function NewsPageClient({
       .catch(() => {});
   }, []);
 
-  // Category change → reset & re-fetch
+  // Resolve the list from the URL (search query / category). When the URL has no
+  // filter we keep the server-rendered default list (no extra fetch).
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveFromUrl = async () => {
+      setSelectedCategory(urlCategory);
+      setPage(1);
+
+      if (!urlQuery && urlCategory === "all") {
+        setNews(initialNews);
+        setHasMore(initialNews.length < totalCount);
+        return;
+      }
+
+      setIsLoading(true);
+      const params = new URLSearchParams({ page: "1", limit: "12", status: "published", locale });
+      if (urlCategory !== "all") params.set("category", urlCategory);
+      if (urlQuery) params.set("q", urlQuery);
+
+      try {
+        const res = await fetch(`/api/news?${params}`);
+        const data = await res.json();
+        if (!cancelled) {
+          setNews(data.data || []);
+          setHasMore(data.hasMore || false);
+        }
+      } catch {
+        /* ignore */
+      }
+      if (!cancelled) setIsLoading(false);
+    };
+
+    resolveFromUrl();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQuery, urlCategory]);
+
+  // Category change → reset & re-fetch (combines with any active search query)
   const handleCategoryChange = useCallback(
     async (cat: string) => {
       setSelectedCategory(cat);
@@ -116,7 +159,7 @@ export default function NewsPageClient({
         locale,
       });
       if (cat !== "all") params.set("category", cat);
-      if (initialQuery) params.set("q", initialQuery);
+      if (urlQuery) params.set("q", urlQuery);
 
       try {
         const res = await fetch(`/api/news?${params}`);
@@ -128,7 +171,7 @@ export default function NewsPageClient({
       }
       setIsLoading(false);
     },
-    [locale, initialQuery]
+    [locale, urlQuery]
   );
 
   // Load more news
@@ -144,7 +187,7 @@ export default function NewsPageClient({
       locale,
     });
     if (selectedCategory !== "all") params.set("category", selectedCategory);
-    if (initialQuery) params.set("q", initialQuery);
+    if (urlQuery) params.set("q", urlQuery);
 
     try {
       const res = await fetch(`/api/news?${params}`);
@@ -156,7 +199,7 @@ export default function NewsPageClient({
       /* ignore */
     }
     setIsLoading(false);
-  }, [isLoading, hasMore, page, locale, selectedCategory, initialQuery]);
+  }, [isLoading, hasMore, page, locale, selectedCategory, urlQuery]);
 
   // IntersectionObserver for infinity scroll
   useEffect(() => {
@@ -197,14 +240,14 @@ export default function NewsPageClient({
           <p className="hero-subtitle text-gray-400 text-lg max-w-2xl mx-auto">
             {translations.subtitle}
           </p>
-          {initialQuery && (
+          {urlQuery && (
             <p className="text-yellow-500 text-sm mt-3">
               {locale === "vi"
                 ? "Kết quả tìm kiếm cho"
                 : locale === "en"
                   ? "Search results for"
                   : "搜索结果"}
-              : <span className="font-semibold">&quot;{initialQuery}&quot;</span>
+              : <span className="font-semibold">&quot;{urlQuery}&quot;</span>
             </p>
           )}
         </div>

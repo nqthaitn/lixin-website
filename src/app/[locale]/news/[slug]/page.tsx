@@ -19,7 +19,7 @@ export async function generateStaticParams() {
     .select("slug")
     .eq("status", "published")
     .order("created_at", { ascending: false })
-    .limit(50);
+    .limit(12);
 
   const slugs = (data || []).map((n) => n.slug).filter(Boolean);
   return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
