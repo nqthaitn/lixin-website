@@ -39,10 +39,19 @@ export async function GET(request: Request) {
     const locale = searchParams.get("locale") || "vi";
 
     // Public browse (published only) uses the cookie-less client so responses
-    // can be CDN-cached. Admin queries (status=all/draft) keep the cookie client
-    // so RLS/session still applies.
+    // can be CDN-cached. Admin queries (status=all/draft) use the cookie client
+    // and must be authenticated — don't rely on RLS alone.
     const isPublic = !status || status === "published";
-    const supabase = isPublic ? supabasePublic : await createClient();
+    let supabase;
+    if (isPublic) {
+      supabase = supabasePublic;
+    } else {
+      const cookieClient = await createClient();
+      if (!(await requireUser(cookieClient))) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      supabase = cookieClient;
+    }
 
     // Use FTS RPC when search query is present
     if (q && q.length >= 2) {
