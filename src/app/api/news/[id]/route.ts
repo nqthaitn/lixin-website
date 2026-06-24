@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
+
+// Columns an admin may set when updating an article. Prevents mass-assignment
+// of internal fields (id, slug, author, view_count, timestamps, ...).
+const EDITABLE_FIELDS = [
+  "title_vi",
+  "title_en",
+  "title_zh",
+  "content_vi",
+  "content_en",
+  "content_zh",
+  "excerpt_vi",
+  "excerpt_en",
+  "excerpt_zh",
+  "category",
+  "cover_image",
+  "status",
+  "source_url",
+  "is_highlight",
+  "tags",
+  "meta_desc_vi",
+  "meta_desc_en",
+  "meta_desc_zh",
+] as const;
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -10,10 +34,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     // Admin-only: this endpoint returns any article (including drafts), so it
     // must require an authenticated session. Public reads go through the
     // published-only helpers in lib/news.ts.
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
+    if (!(await requireUser(supabase))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -33,23 +54,22 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const supabase = await createClient();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
 
-    if (sessionError || !session) {
+    if (!(await requireUser(supabase))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
 
+    // Only allow whitelisted columns through — never spread the raw body.
+    const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    for (const field of EDITABLE_FIELDS) {
+      if (field in body) update[field] = body[field];
+    }
+
     const { data, error } = await supabase
       .from("news")
-      .update({
-        ...body,
-        updated_at: new Date().toISOString(),
-      })
+      .update(update)
       .eq("id", id)
       .select()
       .single();
@@ -73,12 +93,8 @@ export async function DELETE(
   try {
     const { id } = await params;
     const supabase = await createClient();
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
 
-    if (sessionError || !session) {
+    if (!(await requireUser(supabase))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

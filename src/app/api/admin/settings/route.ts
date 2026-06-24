@@ -1,24 +1,13 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-// Default settings fallback if table doesn't exist yet
-const DEFAULTS: Record<string, string> = {
-  admin_email: "lixinvn.co.ltd@gmail.com",
-  admin_phone: "0395 536 768",
-  contact_notify_email: "lixinvn.co.ltd@gmail.com",
-  email_notifications: "true",
-  auto_publish_news: "false",
-};
+import { requireUser } from "@/lib/auth";
+import { SETTING_DEFAULTS as DEFAULTS } from "@/lib/settings";
 
 export async function GET() {
   try {
     const supabase = await createClient();
 
-    // Check auth
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+    if (!(await requireUser(supabase))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -47,11 +36,7 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient();
 
-    // Check auth
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+    if (!(await requireUser(supabase))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -80,16 +65,5 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error("[Settings] POST error:", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
-
-// Helper to get a single setting value (for use in other routes)
-export async function getSettingValue(key: string): Promise<string> {
-  try {
-    const supabase = await createClient();
-    const { data } = await supabase.from("site_settings").select("value").eq("key", key).single();
-    return data?.value ?? DEFAULTS[key] ?? "";
-  } catch {
-    return DEFAULTS[key] ?? "";
   }
 }

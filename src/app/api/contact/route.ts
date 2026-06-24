@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getSettingValue } from "@/app/api/admin/settings/route";
+import { getSettingValue } from "@/lib/settings";
 
 export async function POST(request: Request) {
   try {

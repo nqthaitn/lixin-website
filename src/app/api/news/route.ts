@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { supabasePublic } from "@/lib/supabase/public";
-import { getSettingValue } from "@/app/api/admin/settings/route";
+import { requireUser } from "@/lib/auth";
+import { getSettingValue } from "@/lib/settings";
 
 // Cache published-news browse responses at the CDN/edge for 5 min,
 // serving stale while revalidating for a smoother experience.
@@ -125,12 +126,8 @@ export async function POST(request: Request) {
   try {
     const supabase = await createClient();
 
-    const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
-
-    if (sessionError || !session) {
+    const user = await requireUser(supabase);
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -182,7 +179,7 @@ export async function POST(request: Request) {
               ? "published"
               : "draft"),
           source_url: source_url || null,
-          author: session.user.email || "",
+          author: user.email || "",
         },
       ])
       .select()

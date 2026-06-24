@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
     const supabase = await createClient();
+
+    if (!(await requireUser(supabase))) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
 
     const status = searchParams.get("status") || "all";
@@ -27,7 +33,10 @@ export async function GET(request: Request) {
     }
 
     if (search) {
-      query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%,email.ilike.%${search}%`);
+      // Strip characters that are syntactically meaningful in a PostgREST
+      // `or` filter string to avoid filter injection.
+      const safe = search.replace(/[,()]/g, "");
+      query = query.or(`name.ilike.%${safe}%,phone.ilike.%${safe}%,email.ilike.%${safe}%`);
     }
 
     const { data, error, count } = await query;
@@ -45,6 +54,11 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const supabase = await createClient();
+
+    if (!(await requireUser(supabase))) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id, status, admin_note } = body;
 
@@ -83,10 +97,7 @@ export async function DELETE(request: Request) {
   try {
     const supabase = await createClient();
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
+    if (!(await requireUser(supabase))) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
