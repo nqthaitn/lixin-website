@@ -7,19 +7,22 @@ import { supabasePublic } from "@/lib/supabase/public";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/routing";
 
-// ISR: article pages are pre-rendered and refreshed at most every 5 min;
-// admin edits flush them instantly via revalidateTag("news").
-export const revalidate = 300;
+// Article content only changes on admin edit, which flushes the cache instantly
+// via revalidateTag("news"). So we can keep the article HTML cached for a long
+// time — this means non-prebuilt/new articles cold-render at most once per day
+// instead of every few minutes.
+export const revalidate = 86400; // 1 day
 
-// Pre-build the most recent published articles for each locale; any other slug
-// is rendered on first request and then cached (dynamicParams defaults to true).
+// Pre-build every published article (per locale) at deploy time so existing
+// articles are served as static HTML with no cold render. Brand-new articles
+// created after a deploy render on first request, then cache (dynamicParams).
 export async function generateStaticParams() {
   const { data } = await supabasePublic
     .from("news")
     .select("slug")
     .eq("status", "published")
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(1000);
 
   const slugs = (data || []).map((n) => n.slug).filter(Boolean);
   return routing.locales.flatMap((locale) => slugs.map((slug) => ({ locale, slug })));
