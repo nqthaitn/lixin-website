@@ -1,0 +1,8 @@
+{
+  "name": "ai-dev-template",
+  "version": "1.3.0",
+  "mode": "repo-local",
+  "installedAt": "2026-06-24T00:00:00Z",
+  "source": "nqthaitn/ai-dev-template",
+  "note": "Project-local install: skills/commands/agents copied into .claude/ (not global). Update by re-copying from the template repo."
+}
