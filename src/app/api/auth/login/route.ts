@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     const supabase = await createClient();
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -21,7 +21,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
 
-    return NextResponse.json({ user: data.user, session: data.session }, { status: 200 });
+    // The session is set as httpOnly cookies by the SSR client. Don't echo
+    // tokens in the body — the client only needs success.
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

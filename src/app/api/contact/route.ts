@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSettingValue } from "@/lib/settings";
 
+// Escape user-supplied text before interpolating into email HTML.
+const escapeHtml = (s?: string) =>
+  (s ?? "").replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!
+  );
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -123,7 +130,9 @@ async function sendEmailNotification(info: {
     setup: "Thành lập DN",
   };
 
-  const serviceLabel = info.service ? SERVICE_LABELS[info.service] || info.service : "Chưa chọn";
+  const serviceLabel = info.service
+    ? SERVICE_LABELS[info.service] || escapeHtml(info.service)
+    : "Chưa chọn";
 
   const logoUrl = "https://lixinvn.com/images/logo-lixin.png";
 
@@ -138,20 +147,20 @@ async function sendEmailNotification(info: {
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #374151; width: 140px;">Họ tên:</td>
-            <td style="padding: 8px 0; color: #1f2937;">${info.name}</td>
+            <td style="padding: 8px 0; color: #1f2937;">${escapeHtml(info.name)}</td>
           </tr>
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #374151;">Số điện thoại:</td>
-            <td style="padding: 8px 0; color: #1f2937;">${info.phone}</td>
+            <td style="padding: 8px 0; color: #1f2937;">${escapeHtml(info.phone)}</td>
           </tr>
-          ${info.email ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Email:</td><td style="padding: 8px 0; color: #1f2937;">${info.email}</td></tr>` : ""}
+          ${info.email ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Email:</td><td style="padding: 8px 0; color: #1f2937;">${escapeHtml(info.email)}</td></tr>` : ""}
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #374151;">Dịch vụ:</td>
             <td style="padding: 8px 0; color: #1f2937;">${serviceLabel}</td>
           </tr>
-          ${info.date ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Ngày hẹn:</td><td style="padding: 8px 0; color: #1f2937;">${info.date}</td></tr>` : ""}
-          ${info.time ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Giờ:</td><td style="padding: 8px 0; color: #1f2937;">${info.time}</td></tr>` : ""}
-          ${info.notes ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Ghi chú:</td><td style="padding: 8px 0; color: #1f2937;">${info.notes}</td></tr>` : ""}
+          ${info.date ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Ngày hẹn:</td><td style="padding: 8px 0; color: #1f2937;">${escapeHtml(info.date)}</td></tr>` : ""}
+          ${info.time ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Giờ:</td><td style="padding: 8px 0; color: #1f2937;">${escapeHtml(info.time)}</td></tr>` : ""}
+          ${info.notes ? `<tr><td style="padding: 8px 0; font-weight: bold; color: #374151;">Ghi chú:</td><td style="padding: 8px 0; color: #1f2937;">${escapeHtml(info.notes)}</td></tr>` : ""}
           <tr>
             <td style="padding: 8px 0; font-weight: bold; color: #374151;">Ngôn ngữ:</td>
             <td style="padding: 8px 0; color: #1f2937;">${LOCALE_LABELS[info.locale || "vi"] || info.locale}</td>
@@ -213,7 +222,7 @@ async function sendCustomerConfirmation(info: {
   const i18n: Record<string, Record<string, string>> = {
     vi: {
       subtitle: "TƯ VẤN KẾ TOÁN & PHÁP LÝ",
-      greeting: `Kính gửi <strong>${info.name}</strong>,`,
+      greeting: `Kính gửi <strong>${escapeHtml(info.name)}</strong>,`,
       thanks: `Cảm ơn Quý khách đã tin tưởng và gửi yêu cầu tư vấn đến <strong>Công ty TNHH Dịch vụ và Tư vấn Lixin (Việt Nam)</strong>.`,
       received:
         "Chúng tôi đã tiếp nhận thông tin{service} của Quý khách. \nĐội ngũ tư vấn sẽ liên hệ lại trong thời gian sớm nhất (trong vòng <strong>24 giờ làm việc</strong>) để hỗ trợ chi tiết.",
@@ -229,7 +238,7 @@ async function sendCustomerConfirmation(info: {
     },
     en: {
       subtitle: "ACCOUNTING & TAX ADVISORY",
-      greeting: `Dear <strong>${info.name}</strong>,`,
+      greeting: `Dear <strong>${escapeHtml(info.name)}</strong>,`,
       thanks: `Thank you for your trust and for submitting a consultation request to <strong>Lixin Consulting & Services Co., Ltd (Vietnam)</strong>.`,
       received:
         "We have received your information{service}. \nOur consulting team will contact you as soon as possible (within <strong>24 business hours</strong>) to provide detailed assistance.",
@@ -245,7 +254,7 @@ async function sendCustomerConfirmation(info: {
     },
     zh: {
       subtitle: "会计与税务咨询",
-      greeting: `尊敬的 <strong>${info.name}</strong>，`,
+      greeting: `尊敬的 <strong>${escapeHtml(info.name)}</strong>，`,
       thanks: `感谢您的信任，并向 <strong>Lixin咨询与服务有限责任公司（越南）</strong> 提交咨询请求。`,
       received:
         "我们已收到您的信息{service}。\n我们的咨询团队将尽快与您联系（在 <strong>24 个工作时内</strong>），以提供详细的帮助。",
@@ -300,15 +309,15 @@ async function sendCustomerConfirmation(info: {
   };
 
   const svcLabels = SERVICE_LABELS[locale] || SERVICE_LABELS.vi;
-  const serviceLabel = info.service ? svcLabels[info.service] || info.service : "";
+  const serviceLabel = info.service ? svcLabels[info.service] || escapeHtml(info.service) : "";
 
   const appointmentHtml =
     info.date || info.time
       ? `
         <div style="background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 20px 0;">
           <p style="margin: 0 0 8px; font-weight: bold; color: #374151; font-size: 15px;">${t.appointmentTitle}</p>
-          ${info.date ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">${t.dateLabel} <strong style="color: #1f2937;">${info.date}</strong></p>` : ""}
-          ${info.time ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">${t.timeLabel} <strong style="color: #1f2937;">${info.time}</strong></p>` : ""}
+          ${info.date ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">${t.dateLabel} <strong style="color: #1f2937;">${escapeHtml(info.date)}</strong></p>` : ""}
+          ${info.time ? `<p style="margin: 4px 0; font-size: 14px; color: #4b5563;">${t.timeLabel} <strong style="color: #1f2937;">${escapeHtml(info.time)}</strong></p>` : ""}
         </div>
       `
       : "";

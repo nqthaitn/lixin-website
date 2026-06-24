@@ -80,7 +80,8 @@ export async function GET(request: Request) {
     // Regular query (no search) — browse/filter mode. Shares the list-query
     // builder with the cached SSR helpers in lib/news.ts.
     const { data, count, error } = await newsListQuery(supabase, {
-      status,
+      // Public browse always constrained to published (don't rely on RLS alone).
+      status: isPublic ? "published" : status,
       category,
       sort,
       fromDate,
