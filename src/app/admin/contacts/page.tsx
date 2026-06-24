@@ -1,69 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import {
-  Search,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  Phone,
-  Mail,
-  Clock,
-  X,
-  MessageSquare,
-  Save,
-  CheckCircle,
-  AlertCircle,
-  Send,
-  StickyNote,
-  ExternalLink,
-  Trash2,
-} from "lucide-react";
-
-interface Contact {
-  id: number;
-  name: string;
-  phone: string;
-  email: string | null;
-  service_type: string;
-  message: string | null;
-  source: string;
-  status: string;
-  admin_note?: string | null;
-  locale?: string;
-  created_at: string;
-}
-
-const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string; dot: string }> = {
-  new: { label: "Mới", bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
-  contacted: {
-    label: "Đã liên hệ",
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    dot: "bg-amber-500",
-  },
-  converted: {
-    label: "Thành công",
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  rejected: { label: "Từ chối", bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500" },
-};
-
-const SERVICE_LABELS: Record<string, string> = {
-  general: "Chung",
-  accounting: "Kế toán",
-  other: "Khác",
-};
-
-const LOCALE_CONFIG: Record<string, { flag: string; label: string }> = {
-  vi: { flag: "🇻🇳", label: "Tiếng Việt" },
-  en: { flag: "🇬🇧", label: "English" },
-  zh: { flag: "🇨🇳", label: "中文" },
-};
-
-const PAGE_SIZE = 20;
+import { Search, Filter, ChevronLeft, ChevronRight, MessageSquare } from "lucide-react";
+import { Contact, PAGE_SIZE } from "./constants";
+import { ContactCard } from "./ContactCard";
+import { ContactDetailModal } from "./ContactDetailModal";
+import { ReplyModal } from "./ReplyModal";
+import { DeleteDialog } from "./DeleteDialog";
+import { Toast, ToastState } from "./Toast";
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -82,7 +26,7 @@ export default function ContactsPage() {
   const [editStatus, setEditStatus] = useState("");
   const [editNote, setEditNote] = useState("");
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
 
   // Reply email (shared for both inline quick reply and modal reply)
   const [replyTarget, setReplyTarget] = useState<Contact | null>(null);
@@ -324,132 +268,15 @@ export default function ContactsPage() {
             <p>Không tìm thấy liên hệ nào</p>
           </div>
         ) : (
-          contacts.map((contact) => {
-            const sc = STATUS_CONFIG[contact.status] || STATUS_CONFIG.new;
-            return (
-              <div
-                key={contact.id}
-                className={`bg-white rounded-xl border border-gray-200 overflow-hidden transition-all hover:shadow-md ${
-                  contact.status === "new" ? "border-l-4 border-l-blue-500" : ""
-                }`}
-              >
-                {/* Card Header */}
-                <div className="px-4 sm:px-5 py-3 sm:py-4">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                    {/* Left: Avatar + Info */}
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm sm:text-base flex-shrink-0">
-                        {contact.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
-                            {contact.name}
-                          </h3>
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${sc.bg} ${sc.text}`}
-                          >
-                            <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`}></span>
-                            {sc.label}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="text-xs text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
-                            {SERVICE_LABELS[contact.service_type] || contact.service_type}
-                          </span>
-                          {contact.locale && (
-                            <span
-                              className="text-xs text-gray-500 bg-gray-50 px-1.5 py-0.5 rounded"
-                              title={LOCALE_CONFIG[contact.locale]?.label || contact.locale}
-                            >
-                              {LOCALE_CONFIG[contact.locale]?.flag || "🌐"}{" "}
-                              <span className="hidden sm:inline">
-                                {LOCALE_CONFIG[contact.locale]?.label || contact.locale}
-                              </span>
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 mt-1.5 text-xs sm:text-sm text-gray-500 flex-wrap">
-                          <a
-                            href={`tel:${contact.phone}`}
-                            className="flex items-center gap-1 hover:text-blue-600 transition-colors"
-                          >
-                            <Phone size={12} className="text-gray-400" />
-                            {contact.phone}
-                          </a>
-                          {contact.email && (
-                            <span className="flex items-center gap-1 truncate max-w-[160px] sm:max-w-none">
-                              <Mail size={12} className="text-gray-400 flex-shrink-0" />
-                              <span className="truncate">{contact.email}</span>
-                            </span>
-                          )}
-                          <span className="flex items-center gap-1 text-xs">
-                            <Clock size={11} className="text-gray-400" />
-                            {new Date(contact.created_at).toLocaleDateString("vi-VN")}{" "}
-                            {new Date(contact.created_at).toLocaleTimeString("vi-VN", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Actions - stacked on mobile, inline on desktop */}
-                    <div className="flex items-center gap-2 flex-shrink-0 ml-13 sm:ml-0">
-                      {contact.email && (
-                        <button
-                          onClick={() => openReply(contact)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
-                        >
-                          <Send size={12} />
-                          Trả lời
-                        </button>
-                      )}
-                      <button
-                        onClick={() => openDetail(contact)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-100 transition-colors"
-                      >
-                        <ExternalLink size={12} />
-                        Chi tiết
-                      </button>
-                      <button
-                        onClick={() => setDeleteTarget(contact)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Xóa"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card Body: Message + Note */}
-                {(contact.message || contact.admin_note) && (
-                  <div className="px-5 pb-4 pt-0">
-                    <div className="flex gap-3">
-                      {contact.message && (
-                        <div className="flex-1 flex items-start gap-2 px-3 py-2.5 bg-gray-50 rounded-lg min-w-0">
-                          <MessageSquare size={14} className="text-gray-400 mt-0.5 flex-shrink-0" />
-                          <div className="text-sm text-gray-700 whitespace-pre-wrap break-words line-clamp-3 min-w-0">
-                            {contact.message}
-                          </div>
-                        </div>
-                      )}
-                      {contact.admin_note && (
-                        <div className="flex-1 flex items-start gap-2 px-3 py-2.5 bg-amber-50 rounded-lg border border-amber-100 min-w-0">
-                          <StickyNote size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
-                          <div className="text-sm text-amber-800 whitespace-pre-wrap break-words line-clamp-3 min-w-0">
-                            {contact.admin_note}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })
+          contacts.map((contact) => (
+            <ContactCard
+              key={contact.id}
+              contact={contact}
+              onReply={openReply}
+              onDetail={openDetail}
+              onDelete={setDeleteTarget}
+            />
+          ))
         )}
       </div>
 
@@ -482,306 +309,47 @@ export default function ContactsPage() {
         </div>
       )}
 
-      {/* Detail Modal */}
       {selectedContact && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">Chi tiết liên hệ</h2>
-              <button
-                onClick={closeDetail}
-                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="p-6 space-y-5">
-              {/* Info */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    {selectedContact.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-lg">{selectedContact.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(selectedContact.created_at).toLocaleString("vi-VN")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-gray-500 text-xs mb-1">Số điện thoại</p>
-                    <a
-                      href={`tel:${selectedContact.phone}`}
-                      className="text-blue-600 font-medium hover:underline"
-                    >
-                      {selectedContact.phone}
-                    </a>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-gray-500 text-xs mb-1">Email</p>
-                    <p className="text-gray-900 font-medium">{selectedContact.email || "—"}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-gray-500 text-xs mb-1">Dịch vụ</p>
-                    <p className="text-gray-900 font-medium">
-                      {SERVICE_LABELS[selectedContact.service_type] || selectedContact.service_type}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-gray-500 text-xs mb-1">Nguồn</p>
-                    <p className="text-gray-900 font-medium">{selectedContact.source}</p>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-gray-500 text-xs mb-1">Ngôn ngữ</p>
-                    <p className="text-gray-900 font-medium">
-                      {selectedContact.locale ? (
-                        <>
-                          {LOCALE_CONFIG[selectedContact.locale]?.flag}{" "}
-                          {LOCALE_CONFIG[selectedContact.locale]?.label || selectedContact.locale}
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedContact.message && (
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-gray-500 text-xs mb-1">Tin nhắn</p>
-                    <p className="text-gray-900 text-sm whitespace-pre-wrap">
-                      {selectedContact.message}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Status update */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {Object.entries(STATUS_CONFIG).map(([key, cfg]) => (
-                    <button
-                      key={key}
-                      onClick={() => setEditStatus(key)}
-                      className={`px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-                        editStatus === key
-                          ? `${cfg.bg} ${cfg.text} border-current ring-2 ring-current/20`
-                          : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {cfg.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Admin note */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ghi chú nội bộ
-                </label>
-                <textarea
-                  rows={3}
-                  value={editNote}
-                  onChange={(e) => setEditNote(e.target.value)}
-                  placeholder="Ghi chú cho nhân viên..."
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-y"
-                />
-              </div>
-
-              {/* Reply button in modal */}
-              {selectedContact.email && (
-                <button
-                  onClick={() => {
-                    closeDetail();
-                    openReply(selectedContact);
-                  }}
-                  className="flex items-center gap-2 w-full justify-center py-2.5 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors border border-blue-100"
-                >
-                  <Send size={15} />
-                  Trả lời qua email ({selectedContact.email})
-                </button>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-              <button
-                onClick={() => {
-                  setDeleteTarget(selectedContact);
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 text-red-500 text-sm font-medium hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <Trash2 size={15} />
-                Xóa
-              </button>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={closeDetail}
-                  className="px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors"
-                >
-                  Đóng
-                </button>
-                <button
-                  onClick={saveContact}
-                  disabled={saving}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                >
-                  <Save size={16} />
-                  {saving ? "Đang lưu..." : "Lưu thay đổi"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ContactDetailModal
+          contact={selectedContact}
+          editStatus={editStatus}
+          editNote={editNote}
+          saving={saving}
+          onEditStatus={setEditStatus}
+          onEditNote={setEditNote}
+          onClose={closeDetail}
+          onSave={saveContact}
+          onDelete={setDeleteTarget}
+          onReply={(c) => {
+            closeDetail();
+            openReply(c);
+          }}
+        />
       )}
 
-      {/* Reply Email Modal */}
       {replyTarget && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Send size={16} className="text-blue-600" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold text-gray-900">Trả lời email</h2>
-                  <p className="text-xs text-gray-500">
-                    Gửi đến: {replyTarget.name} ({replyTarget.email})
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={closeReply}
-                className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Original message */}
-            {replyTarget.message && (
-              <div className="mx-6 mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="text-xs text-gray-500 mb-1 font-medium">Tin nhắn gốc:</p>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-4">
-                  {replyTarget.message}
-                </p>
-              </div>
-            )}
-
-            {/* Reply form */}
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Tiêu đề</label>
-                <input
-                  type="text"
-                  value={replySubject}
-                  onChange={(e) => setReplySubject(e.target.value)}
-                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Nội dung</label>
-                <textarea
-                  rows={6}
-                  value={replyMessage}
-                  onChange={(e) => setReplyMessage(e.target.value)}
-                  placeholder={`Kính gửi ${replyTarget.name},\n\nCảm ơn Quý khách đã liên hệ đến Lixin VN.\n\n...`}
-                  className="w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-y"
-                />
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
-              <button
-                onClick={closeReply}
-                className="px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={sendReply}
-                disabled={sendingReply || !replyMessage.trim()}
-                className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                <Send size={15} />
-                {sendingReply ? "Đang gửi..." : "Gửi email"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ReplyModal
+          target={replyTarget}
+          subject={replySubject}
+          message={replyMessage}
+          sending={sendingReply}
+          onSubject={setReplySubject}
+          onMessage={setReplyMessage}
+          onClose={closeReply}
+          onSend={sendReply}
+        />
       )}
 
-      {/* Delete Confirmation */}
       {deleteTarget && (
-        <div className="fixed inset-0 bg-black/50 z-[55] flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl">
-            <div className="p-6 text-center">
-              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 size={24} className="text-red-500" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Xóa liên hệ?</h3>
-              <p className="text-sm text-gray-500">
-                Bạn có chắc muốn xóa liên hệ <strong>{deleteTarget.name}</strong>?
-                <br />
-                Hành động này không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex gap-3 px-6 pb-6">
-              <button
-                onClick={() => setDeleteTarget(null)}
-                className="flex-1 px-4 py-2.5 text-gray-700 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={deleteContact}
-                disabled={deleting}
-                className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
-              >
-                <Trash2 size={15} />
-                {deleting ? "Đang xóa..." : "Xóa"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <DeleteDialog
+          target={deleteTarget}
+          deleting={deleting}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={deleteContact}
+        />
       )}
 
-      {/* Toast Notification */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-[60] animate-[slideUp_0.3s_ease-out]">
-          <div
-            className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg border ${
-              toast.type === "success"
-                ? "bg-green-50 border-green-200 text-green-800"
-                : "bg-red-50 border-red-200 text-red-800"
-            }`}
-          >
-            {toast.type === "success" ? (
-              <CheckCircle size={20} className="text-green-500 flex-shrink-0" />
-            ) : (
-              <AlertCircle size={20} className="text-red-500 flex-shrink-0" />
-            )}
-            <span className="text-sm font-medium">{toast.message}</span>
-            <button
-              onClick={() => setToast(null)}
-              className="ml-2 text-gray-400 hover:text-gray-600"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
+      {toast && <Toast toast={toast} onClose={() => setToast(null)} />}
     </div>
   );
 }
