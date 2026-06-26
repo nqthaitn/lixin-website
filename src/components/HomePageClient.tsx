@@ -5,9 +5,11 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Calculator, Receipt, Building2, ArrowRight, DollarSign } from "lucide-react";
 import { News } from "@/types/news";
-import { motion, type Variants } from "motion/react";
+import { motion, useScroll, useTransform, type Variants } from "motion/react";
+import { useRef } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import TiltCard from "@/components/TiltCard";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: { general: "Thuế", accounting: "Kế toán", legal: "Pháp lý" },
@@ -39,6 +41,14 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
     { icon: Building2, titleKey: "setup" as const, descKey: "setup_desc" as const },
   ];
 
+  // Hero parallax — drift the hero content slower than the scroll.
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroContentY = useTransform(scrollYProgress, [0, 1], [0, 80]);
+
   // Scroll reveal hooks for each section
   const statsReveal = useScrollReveal<HTMLDivElement>();
   const newsReveal = useScrollReveal<HTMLDivElement>();
@@ -48,7 +58,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
   return (
     <div className="pt-16 bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Hero */}
-      <section className="relative bg-gray-950 text-white overflow-hidden">
+      <section ref={heroRef} className="relative bg-gray-950 text-white overflow-hidden">
         <div
           className="hero-glow-1 absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] rounded-full blur-[120px]"
           style={{
@@ -62,7 +72,10 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
           }}
         />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
+        <motion.div
+          style={{ y: heroContentY }}
+          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
@@ -122,7 +135,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Stats — with counting animation */}
@@ -174,28 +187,24 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {featuredServices.map(({ icon: Icon, titleKey, descKey }) => (
-              <motion.div
-                key={titleKey}
-                variants={fadeUp}
-                whileHover={{ y: -8 }}
-                transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className="bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5 group"
-              >
-                <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
-                  <Icon size={28} className="text-yellow-600" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{st(titleKey)}</h3>
-                <p className="text-gray-600 mb-4">{st(descKey)}</p>
-                <Link
-                  href="/services"
-                  className="inline-flex items-center text-yellow-600 font-medium hover:text-yellow-500 transition-colors"
-                >
-                  {common("learn_more")}
-                  <ArrowRight
-                    className="ml-1 group-hover:translate-x-1 transition-transform"
-                    size={16}
-                  />
-                </Link>
+              <motion.div key={titleKey} variants={fadeUp} style={{ perspective: 900 }}>
+                <TiltCard className="h-full bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5 group">
+                  <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
+                    <Icon size={28} className="text-yellow-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-3">{st(titleKey)}</h3>
+                  <p className="text-gray-600 mb-4">{st(descKey)}</p>
+                  <Link
+                    href="/services"
+                    className="inline-flex items-center text-yellow-600 font-medium hover:text-yellow-500 transition-colors"
+                  >
+                    {common("learn_more")}
+                    <ArrowRight
+                      className="ml-1 group-hover:translate-x-1 transition-transform"
+                      size={16}
+                    />
+                  </Link>
+                </TiltCard>
               </motion.div>
             ))}
           </motion.div>

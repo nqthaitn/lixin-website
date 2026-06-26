@@ -13,8 +13,9 @@ import {
   Building2,
   ArrowRight,
 } from "lucide-react";
+import { motion, type Variants } from "motion/react";
 import { Link } from "@/i18n/routing";
-import { useScrollReveal, useStaggerReveal } from "@/hooks/useScrollReveal";
+import TiltCard from "@/components/TiltCard";
 
 const services = [
   { key: "accounting", icon: Calculator },
@@ -28,11 +29,18 @@ const services = [
   { key: "setup", icon: Building2 },
 ];
 
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 18 } },
+};
+
+const stagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
 export default function ServicesPage() {
   const t = useTranslations("services");
-
-  const gridReveal = useStaggerReveal<HTMLDivElement>();
-  const ctaReveal = useScrollReveal<HTMLDivElement>();
 
   return (
     <div className="pt-16">
@@ -48,34 +56,37 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Services Grid */}
+      {/* Services Grid — Framer Motion stagger + tilt */}
       <section className="py-20">
-        <div ref={gridReveal.ref} className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map(({ key, icon: Icon }, index) => (
-              <div
-                key={key}
-                className={`service-card-enhanced bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 group stagger-item ${gridReveal.isVisible ? "is-visible" : ""}`}
-                style={{
-                  transitionDelay: gridReveal.isVisible ? `${index * 100}ms` : "0ms",
-                }}
-              >
-                <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 group-hover:scale-110 transition-all">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={stagger}
+          className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          {services.map(({ key, icon: Icon }) => (
+            <motion.div key={key} variants={fadeUp} style={{ perspective: 900 }}>
+              <TiltCard className="h-full bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5 group">
+                <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
                   <Icon size={24} className="text-yellow-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{t(key)}</h3>
                 <p className="text-gray-600 mb-4">{t(`${key}_desc`)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+              </TiltCard>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
       {/* CTA */}
       <section className="bg-yellow-500 py-16">
-        <div
-          ref={ctaReveal.ref}
-          className={`max-w-7xl mx-auto px-4 text-center scroll-reveal ${ctaReveal.isVisible ? "is-visible" : ""}`}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={fadeUp}
+          className="max-w-7xl mx-auto px-4 text-center"
         >
           <h2 className="text-3xl font-bold text-black mb-4">{t("cta_title")}</h2>
           <p className="text-black/70 mb-8">{t("cta_text")}</p>
@@ -86,7 +97,7 @@ export default function ServicesPage() {
             {t("cta_button")}
             <ArrowRight className="ml-2" size={18} />
           </Link>
-        </div>
+        </motion.div>
       </section>
     </div>
   );
