@@ -6,7 +6,11 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { News } from "@/types/news";
 import { ArrowRight, Clock, Newspaper, Loader2, ChevronDown, Eye, TrendingUp } from "lucide-react";
-import { useScrollReveal, useStaggerReveal } from "@/hooks/useScrollReveal";
+import { motion } from "motion/react";
+import { fadeUp, inViewOnce } from "@/lib/motion";
+
+// Link with motion props (entrance reveal + spring hover lift) for news cards.
+const MotionLink = motion.create(Link);
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: {
@@ -222,9 +226,6 @@ export default function NewsPageClient({
   const highlightNews = news[0];
   const restNews = news.slice(1);
 
-  const newsGridReveal = useStaggerReveal<HTMLDivElement>();
-  const sidebarReveal = useScrollReveal<HTMLDivElement>();
-
   return (
     <>
       {/* Hero */}
@@ -363,15 +364,17 @@ export default function NewsPageClient({
                   )}
 
                   {/* Grid */}
-                  <div ref={newsGridReveal.ref} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {restNews.map((item, index) => (
-                      <Link
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {restNews.map((item) => (
+                      <MotionLink
                         key={item.id}
                         href={`/news/${item.slug || item.id}` as "/news"}
-                        className={`bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 group hover:-translate-y-0.5 hover:border-yellow-300 stagger-item ${newsGridReveal.isVisible ? "is-visible" : ""}`}
-                        style={{
-                          transitionDelay: newsGridReveal.isVisible ? `${index * 100}ms` : "0ms",
-                        }}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={inViewOnce}
+                        whileHover={{ y: -6 }}
+                        transition={{ type: "spring", stiffness: 220, damping: 22 }}
+                        className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg group hover:border-yellow-300"
                       >
                         <article>
                           {item.cover_image && (
@@ -421,7 +424,7 @@ export default function NewsPageClient({
                             </div>
                           </div>
                         </article>
-                      </Link>
+                      </MotionLink>
                     ))}
                   </div>
 
@@ -446,10 +449,12 @@ export default function NewsPageClient({
 
             {/* Sidebar — Popular articles */}
             <aside className="w-full lg:w-80 flex-shrink-0">
-              <div
-                ref={sidebarReveal.ref}
-                className={`lg:sticky lg:top-32 scroll-reveal ${sidebarReveal.isVisible ? "is-visible" : ""}`}
-                style={{ transitionDelay: "300ms" }}
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={inViewOnce}
+                variants={fadeUp}
+                className="lg:sticky lg:top-32"
               >
                 <div className="bg-white rounded-2xl border border-gray-200 p-6">
                   <h3 className="text-base font-bold text-gray-900 mb-5 flex items-center gap-2">
@@ -508,7 +513,7 @@ export default function NewsPageClient({
                     </div>
                   )}
                 </div>
-              </div>
+              </motion.div>
             </aside>
           </div>
         </div>

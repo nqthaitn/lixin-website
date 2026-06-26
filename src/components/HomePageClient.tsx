@@ -5,27 +5,16 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Calculator, Receipt, Building2, ArrowRight, DollarSign } from "lucide-react";
 import { News } from "@/types/news";
-import { motion, useScroll, useTransform, type Variants } from "motion/react";
+import { motion, useScroll, useTransform, useInView } from "motion/react";
 import { useRef } from "react";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import TiltCard from "@/components/TiltCard";
+import { fadeUp, stagger, inViewOnce } from "@/lib/motion";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: { general: "Thuế", accounting: "Kế toán", legal: "Pháp lý" },
   en: { general: "Tax", accounting: "Accounting", legal: "Legal" },
   zh: { general: "税务", accounting: "会计", legal: "法律" },
-};
-
-// Shared Framer Motion variants for scroll-in reveals + stagger.
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 18 } },
-};
-
-const stagger: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12 } },
 };
 
 export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
@@ -49,11 +38,9 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
   });
   const heroContentY = useTransform(scrollYProgress, [0, 1], [0, 80]);
 
-  // Scroll reveal hooks for each section
-  const statsReveal = useScrollReveal<HTMLDivElement>();
-  const newsReveal = useScrollReveal<HTMLDivElement>();
-  const whyReveal = useScrollReveal<HTMLDivElement>();
-  const ctaReveal = useScrollReveal<HTMLDivElement>();
+  // Stats counters need a boolean "in view" flag to start counting.
+  const statsRef = useRef<HTMLDivElement>(null);
+  const statsInView = useInView(statsRef, inViewOnce);
 
   return (
     <div className="pt-16 bg-gradient-to-b from-white via-gray-50 to-white">
@@ -140,9 +127,13 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
 
       {/* Stats — with counting animation */}
       <section className="py-16">
-        <div
-          ref={statsReveal.ref}
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${statsReveal.isVisible ? "is-visible" : ""}`}
+        <motion.div
+          ref={statsRef}
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fadeUp}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {[
@@ -155,7 +146,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
                 <AnimatedCounter
                   target={stat.target}
                   suffix={stat.suffix}
-                  isVisible={statsReveal.isVisible}
+                  isVisible={statsInView}
                   duration={2000}
                   className="text-3xl sm:text-4xl font-bold text-yellow-500"
                 />
@@ -163,7 +154,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Featured Services — Framer Motion stagger + spring hover */}
@@ -213,9 +204,12 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
 
       {/* Latest News — Featured Layout with scroll reveal */}
       <section className="py-20 sm:py-24">
-        <div
-          ref={newsReveal.ref}
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${newsReveal.isVisible ? "is-visible" : ""}`}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fadeUp}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <div className="flex items-end justify-between mb-12">
             <div>
@@ -248,7 +242,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
                   return (
                     <Link
                       href={`/news/${item.slug || item.id}` as "/news"}
-                      className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl transition-all group hover:border-yellow-300"
+                      className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover:border-yellow-300"
                     >
                       {item.cover_image && (
                         <div className="relative h-56 overflow-hidden">
@@ -300,7 +294,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
                     <Link
                       key={item.id}
                       href={`/news/${item.slug || item.id}` as "/news"}
-                      className="flex-1 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all group hover:border-yellow-300"
+                      className="flex-1 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group hover:border-yellow-300"
                     >
                       <div className="flex items-center gap-3 mb-3">
                         <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800">
@@ -333,14 +327,17 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
               <ArrowRight className="ml-2" size={18} />
             </Link>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Why Choose Lixin — Orbit Animation */}
       <section className="py-20 sm:py-24 bg-gray-950 text-white overflow-hidden">
-        <div
-          ref={whyReveal.ref}
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${whyReveal.isVisible ? "is-visible" : ""}`}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fadeUp}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -350,27 +347,19 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
               <p className="mt-4 text-gray-400 text-lg">{t("why_subtitle")}</p>
 
               <ul className="mt-8 space-y-6">
-                {(["why_feature_1", "why_feature_2", "why_feature_3"] as const).map(
-                  (key, index) => (
-                    <li
-                      key={key}
-                      className={`flex gap-4 stagger-item ${whyReveal.isVisible ? "is-visible" : ""}`}
-                      style={{
-                        transitionDelay: whyReveal.isVisible ? `${300 + index * 150}ms` : "0ms",
-                      }}
-                    >
-                      <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 font-bold text-sm">
-                        ✓
-                      </div>
-                      <div>
-                        <strong className="text-white block mb-1">
-                          {t(`${key}_title` as const)}
-                        </strong>
-                        <span className="text-gray-400 text-sm">{t(`${key}_desc` as const)}</span>
-                      </div>
-                    </li>
-                  )
-                )}
+                {(["why_feature_1", "why_feature_2", "why_feature_3"] as const).map((key) => (
+                  <li key={key} className="flex gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 bg-yellow-500/20 rounded-full flex items-center justify-center text-yellow-500 font-bold text-sm">
+                      ✓
+                    </div>
+                    <div>
+                      <strong className="text-white block mb-1">
+                        {t(`${key}_title` as const)}
+                      </strong>
+                      <span className="text-gray-400 text-sm">{t(`${key}_desc` as const)}</span>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -397,14 +386,17 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* CTA — with scroll reveal + pulse button */}
       <section className="bg-yellow-500 py-16 sm:py-20">
-        <div
-          ref={ctaReveal.ref}
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center scroll-reveal ${ctaReveal.isVisible ? "is-visible" : ""}`}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={fadeUp}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
           <h2 className="text-3xl sm:text-4xl font-bold text-black">{t("cta_title")}</h2>
           <p className="mt-4 text-black/70 text-lg max-w-2xl mx-auto">{t("cta_subtitle")}</p>
@@ -415,7 +407,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
             {t("cta_button")}
             <ArrowRight className="ml-2" size={20} />
           </Link>
-        </div>
+        </motion.div>
       </section>
     </div>
   );

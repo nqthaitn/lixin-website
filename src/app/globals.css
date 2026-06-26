@@ -94,34 +94,6 @@ body {
   }
 }
 
-/* Scroll-reveal utility classes */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(40px);
-  transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.scroll-reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Stagger children — each child gets increasing delay */
-.stagger-item {
-  opacity: 0;
-  transform: translateY(30px);
-  transition:
-    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.stagger-item.is-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 /* Hero animations */
 .hero-title {
   animation: slideInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -220,13 +192,6 @@ body {
 
 /* Respect prefers-reduced-motion for ALL animations */
 @media (prefers-reduced-motion: reduce) {
-  .scroll-reveal,
-  .stagger-item {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-  }
-
   .hero-title,
   .hero-subtitle,
   .hero-buttons,

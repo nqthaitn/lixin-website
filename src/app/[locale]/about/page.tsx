@@ -1,9 +1,12 @@
 "use client";
 
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Award, Eye, Heart, Calendar } from "lucide-react";
-import { useScrollReveal, useStaggerReveal } from "@/hooks/useScrollReveal";
+import { motion, useInView } from "motion/react";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import TiltCard from "@/components/TiltCard";
+import { fadeUp, stagger, inViewOnce } from "@/lib/motion";
 
 export default function AboutPage() {
   const t = useTranslations("about");
@@ -14,11 +17,9 @@ export default function AboutPage() {
     { icon: Heart, titleKey: "value_3_title", textKey: "value_3_text" },
   ];
 
-  // Scroll reveal hooks
-  const historyReveal = useScrollReveal<HTMLDivElement>();
-  const historyCardReveal = useScrollReveal<HTMLDivElement>();
-  const missionReveal = useStaggerReveal<HTMLDivElement>();
-  const valuesReveal = useStaggerReveal<HTMLDivElement>();
+  // Counter section needs a boolean "in view" flag to start counting.
+  const statsRef = useRef<HTMLDivElement>(null);
+  const statsInView = useInView(statsRef, inViewOnce);
 
   return (
     <div className="pt-16">
@@ -40,25 +41,25 @@ export default function AboutPage() {
       <section className="py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div
-              ref={historyReveal.ref}
-              className={`scroll-reveal ${historyReveal.isVisible ? "is-visible" : ""}`}
-            >
+            <motion.div initial="hidden" whileInView="show" viewport={inViewOnce} variants={fadeUp}>
               <div className="flex items-center space-x-3 mb-6">
                 <Calendar size={24} className="text-yellow-500" />
                 <h2 className="text-3xl font-bold text-gray-900">{t("history_title")}</h2>
               </div>
               <p className="text-gray-600 text-lg leading-relaxed">{t("history_text")}</p>
-            </div>
-            <div
-              ref={historyCardReveal.ref}
-              className={`bg-gray-100 rounded-2xl p-12 text-center scroll-reveal ${historyCardReveal.isVisible ? "is-visible" : ""}`}
-              style={{ transitionDelay: "200ms" }}
+            </motion.div>
+            <motion.div
+              ref={statsRef}
+              initial="hidden"
+              whileInView="show"
+              viewport={inViewOnce}
+              variants={fadeUp}
+              className="bg-gray-100 rounded-2xl p-12 text-center"
             >
               <AnimatedCounter
                 target={2019}
                 suffix=""
-                isVisible={historyCardReveal.isVisible}
+                isVisible={statsInView}
                 duration={1500}
                 className="text-6xl font-bold text-yellow-500"
               />
@@ -68,7 +69,7 @@ export default function AboutPage() {
                   <AnimatedCounter
                     target={200}
                     suffix="+"
-                    isVisible={historyCardReveal.isVisible}
+                    isVisible={statsInView}
                     duration={2000}
                     className="text-2xl font-bold text-gray-900"
                   />
@@ -78,66 +79,70 @@ export default function AboutPage() {
                   <AnimatedCounter
                     target={7}
                     suffix="+"
-                    isVisible={historyCardReveal.isVisible}
+                    isVisible={statsInView}
                     duration={2000}
                     className="text-2xl font-bold text-gray-900"
                   />
                   <div className="text-sm text-gray-500">Năm</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Mission & Vision */}
       <section className="py-20 sm:py-24 bg-gray-50">
-        <div ref={missionReveal.ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {[
-              { title: "mission_title", text: "mission_text" },
-              { title: "vision_title", text: "vision_text" },
-            ].map((item, index) => (
-              <div
-                key={item.title}
-                className={`service-card-enhanced bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 stagger-item ${missionReveal.isVisible ? "is-visible" : ""}`}
-                style={{
-                  transitionDelay: missionReveal.isVisible ? `${index * 200}ms` : "0ms",
-                }}
-              >
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={inViewOnce}
+          variants={stagger}
+          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8"
+        >
+          {[
+            { title: "mission_title", text: "mission_text" },
+            { title: "vision_title", text: "vision_text" },
+          ].map((item) => (
+            <motion.div key={item.title} variants={fadeUp} style={{ perspective: 900 }}>
+              <TiltCard className="h-full bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">{t(item.title)}</h3>
                 <p className="text-gray-600 leading-relaxed">{t(item.text)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+              </TiltCard>
+            </motion.div>
+          ))}
+        </motion.div>
       </section>
 
       {/* Core Values */}
       <section className="py-20 sm:py-24">
-        <div ref={valuesReveal.ref} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2
-            className={`text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16 scroll-reveal ${valuesReveal.isVisible ? "is-visible" : ""}`}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.h2
+            initial="hidden"
+            whileInView="show"
+            viewport={inViewOnce}
+            variants={fadeUp}
+            className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16"
           >
             {t("values_title")}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {values.map(({ icon: Icon, titleKey, textKey }, index) => (
-              <div
-                key={titleKey}
-                className={`text-center stagger-item ${valuesReveal.isVisible ? "is-visible" : ""}`}
-                style={{
-                  transitionDelay: valuesReveal.isVisible ? `${200 + index * 150}ms` : "0ms",
-                }}
-              >
+          </motion.h2>
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={inViewOnce}
+            variants={stagger}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
+            {values.map(({ icon: Icon, titleKey, textKey }) => (
+              <motion.div key={titleKey} variants={fadeUp} className="text-center">
                 <div className="w-16 h-16 bg-yellow-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-transform hover:scale-110 hover:bg-yellow-500/20">
                   <Icon size={32} className="text-yellow-600" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{t(titleKey)}</h3>
                 <p className="text-gray-600">{t(textKey)}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>

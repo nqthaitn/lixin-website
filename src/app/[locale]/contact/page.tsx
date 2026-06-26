@@ -83,8 +83,8 @@ export default function ContactPage() {
       {/* Hero */}
       <section className="bg-gray-950 text-white py-20 mb-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("title")}</h1>
-          <p className="text-gray-400 text-lg">{t("subtitle")}</p>
+          <h1 className="hero-title text-4xl md:text-5xl font-bold mb-4">{t("title")}</h1>
+          <p className="hero-subtitle text-gray-400 text-lg">{t("subtitle")}</p>
         </div>
       </section>
 
