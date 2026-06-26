@@ -5,13 +5,25 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { Calculator, Receipt, Building2, ArrowRight, DollarSign } from "lucide-react";
 import { News } from "@/types/news";
-import { useScrollReveal, useStaggerReveal } from "@/hooks/useScrollReveal";
+import { motion, type Variants } from "motion/react";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AnimatedCounter from "@/components/AnimatedCounter";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: { general: "Thuế", accounting: "Kế toán", legal: "Pháp lý" },
   en: { general: "Tax", accounting: "Accounting", legal: "Legal" },
   zh: { general: "税务", accounting: "会计", legal: "法律" },
+};
+
+// Shared Framer Motion variants for scroll-in reveals + stagger.
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 120, damping: 18 } },
+};
+
+const stagger: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12 } },
 };
 
 export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
@@ -29,23 +41,32 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
 
   // Scroll reveal hooks for each section
   const statsReveal = useScrollReveal<HTMLDivElement>();
-  const servicesReveal = useStaggerReveal<HTMLDivElement>();
   const newsReveal = useScrollReveal<HTMLDivElement>();
   const whyReveal = useScrollReveal<HTMLDivElement>();
   const ctaReveal = useScrollReveal<HTMLDivElement>();
 
   return (
-    <div className="pt-16">
+    <div className="pt-16 bg-gradient-to-b from-white via-gray-50 to-white">
       {/* Hero */}
       <section className="relative bg-gray-950 text-white overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] rounded-full opacity-40 blur-[120px] bg-gradient-radial from-yellow-500/50 to-transparent" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] rounded-full opacity-40 blur-[120px] bg-gradient-radial from-yellow-500/30 to-transparent" />
+        <div
+          className="hero-glow-1 absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] rounded-full blur-[120px]"
+          style={{
+            background: "radial-gradient(circle, rgba(234,179,8,0.55), transparent 70%)",
+          }}
+        />
+        <div
+          className="hero-glow-2 absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] rounded-full blur-[120px]"
+          style={{
+            background: "radial-gradient(circle, rgba(234,179,8,0.35), transparent 70%)",
+          }}
+        />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-40">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="hero-title text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                {t("hero_title")} <span className="text-yellow-500">{t("hero_highlight")}</span>
+                {t("hero_title")} <span className="hero-shimmer">{t("hero_highlight")}</span>
               </h1>
               <p className="hero-subtitle mt-6 text-lg sm:text-xl text-gray-400 leading-relaxed">
                 {t("hero_subtitle")}
@@ -83,7 +104,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
                   <div className="flex-1 bg-gradient-to-t from-yellow-600 to-yellow-400 rounded-t origin-bottom animate-[growUp_1.5s_0.6s_ease-out_forwards] h-[90%]" />
                 </div>
                 <div className="flex items-center gap-3 text-sm text-green-400">
-                  <span className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center animate-pulse">
                     ✓
                   </span>
                   <span>All clear</span>
@@ -105,7 +126,7 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
       </section>
 
       {/* Stats — with counting animation */}
-      <section className="bg-white py-16 border-b border-gray-100">
+      <section className="py-16">
         <div
           ref={statsReveal.ref}
           className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-reveal ${statsReveal.isVisible ? "is-visible" : ""}`}
@@ -132,24 +153,33 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
         </div>
       </section>
 
-      {/* Featured Services — staggered reveal + enhanced hover */}
-      <section className="py-20 sm:py-24 bg-gray-50">
+      {/* Featured Services — Framer Motion stagger + spring hover */}
+      <section className="py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div
-            ref={servicesReveal.ref}
-            className={`text-center mb-16 scroll-reveal ${servicesReveal.isVisible ? "is-visible" : ""}`}
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={fadeUp}
+            className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("featured_title")}</h2>
             <p className="mt-4 text-gray-600 text-lg">{t("featured_subtitle")}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredServices.map(({ icon: Icon, titleKey, descKey }, index) => (
-              <div
+          </motion.div>
+          <motion.div
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, margin: "-80px" }}
+            variants={stagger}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
+            {featuredServices.map(({ icon: Icon, titleKey, descKey }) => (
+              <motion.div
                 key={titleKey}
-                className={`service-card-enhanced bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 group stagger-item ${servicesReveal.isVisible ? "is-visible" : ""}`}
-                style={{
-                  transitionDelay: servicesReveal.isVisible ? `${index * 150}ms` : "0ms",
-                }}
+                variants={fadeUp}
+                whileHover={{ y: -8 }}
+                transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                className="bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5 group"
               >
                 <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
                   <Icon size={28} className="text-yellow-600" />
@@ -166,9 +196,9 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
                     size={16}
                   />
                 </Link>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 

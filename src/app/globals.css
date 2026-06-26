@@ -173,6 +173,51 @@ body {
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
+/* Hero ambient motion — slow drifting glow blobs */
+@keyframes drift1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(6%, 8%) scale(1.15);
+  }
+}
+
+@keyframes drift2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-8%, -6%) scale(1.1);
+  }
+}
+
+.hero-glow-1 {
+  animation: drift1 16s ease-in-out infinite;
+}
+
+.hero-glow-2 {
+  animation: drift2 20s ease-in-out infinite;
+}
+
+/* Animated gold shimmer on the hero highlight word */
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+
+.hero-shimmer {
+  background: linear-gradient(90deg, #eab308 0%, #fde68a 50%, #eab308 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
 /* Respect prefers-reduced-motion for ALL animations */
 @media (prefers-reduced-motion: reduce) {
   .scroll-reveal,
@@ -199,7 +244,10 @@ body {
     transform: none !important;
   }
 
-  .cta-button-pulse {
+  .cta-button-pulse,
+  .hero-glow-1,
+  .hero-glow-2,
+  .hero-shimmer {
     animation: none !important;
   }
 }
