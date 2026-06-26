@@ -9,6 +9,9 @@ import { motion, useScroll, useTransform, useInView } from "motion/react";
 import { useRef } from "react";
 import AnimatedCounter from "@/components/AnimatedCounter";
 import TiltCard from "@/components/TiltCard";
+import GridPattern from "@/components/decor/GridPattern";
+import LineArtChart from "@/components/decor/LineArtChart";
+import { CoinMotif, BuildingMotif, DocumentMotif } from "@/components/decor/Motifs";
 import { fadeUp, stagger, inViewOnce } from "@/lib/motion";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
@@ -125,219 +128,264 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
         </motion.div>
       </section>
 
-      {/* Stats — with counting animation */}
-      <section className="py-16">
-        <motion.div
-          ref={statsRef}
-          initial="hidden"
-          whileInView="show"
-          viewport={inViewOnce}
-          variants={fadeUp}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            {[
-              { target: 200, suffix: "+", label: t("stats_clients") },
-              { target: 7, suffix: "+", label: t("stats_years") },
-              { target: 9, suffix: "", label: t("stats_services") },
-              { target: 10, suffix: "+", label: t("stats_experts") },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <AnimatedCounter
-                  target={stat.target}
-                  suffix={stat.suffix}
-                  isVisible={statsInView}
-                  duration={2000}
-                  className="text-3xl sm:text-4xl font-bold text-yellow-500"
-                />
-                <div className="mt-2 text-gray-600 text-sm sm:text-base">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Featured Services — Framer Motion stagger + spring hover */}
-      <section className="py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={fadeUp}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("featured_title")}</h2>
-            <p className="mt-4 text-gray-600 text-lg">{t("featured_subtitle")}</p>
-          </motion.div>
-          <motion.div
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-80px" }}
-            variants={stagger}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {featuredServices.map(({ icon: Icon, titleKey, descKey }) => (
-              <motion.div key={titleKey} variants={fadeUp} style={{ perspective: 900 }}>
-                <TiltCard className="h-full bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5 group">
-                  <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
-                    <Icon size={28} className="text-yellow-600" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{st(titleKey)}</h3>
-                  <p className="text-gray-600 mb-4">{st(descKey)}</p>
-                  <Link
-                    href="/services"
-                    className="inline-flex items-center text-yellow-600 font-medium hover:text-yellow-500 transition-colors"
-                  >
-                    {common("learn_more")}
-                    <ArrowRight
-                      className="ml-1 group-hover:translate-x-1 transition-transform"
-                      size={16}
+      {/* Light zone (stats + services + news) — subtle texture + warm depth */}
+      <div className="relative">
+        <GridPattern variant="dots" className="absolute inset-0 text-yellow-600/[0.06]" />
+        <div
+          className="pointer-events-none absolute left-1/2 top-0 h-[36vw] w-[36vw] -translate-x-1/2 rounded-full blur-[150px]"
+          style={{ background: "radial-gradient(circle, rgba(234,179,8,0.1), transparent 70%)" }}
+        />
+        {/* Faint line-art motifs scattered behind the content */}
+        <CoinMotif className="pointer-events-none absolute left-[4%] top-[7%] hidden w-16 text-yellow-700/15 lg:block" />
+        <DocumentMotif className="pointer-events-none absolute right-[5%] top-[40%] hidden w-14 rotate-6 text-yellow-700/15 lg:block" />
+        <BuildingMotif className="pointer-events-none absolute left-[6%] top-[74%] hidden w-16 text-yellow-700/15 lg:block" />
+        <div className="relative z-10">
+          {/* Stats — with counting animation */}
+          <section className="py-16">
+            <motion.div
+              ref={statsRef}
+              initial="hidden"
+              whileInView="show"
+              viewport={inViewOnce}
+              variants={fadeUp}
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+            >
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                {[
+                  { target: 200, suffix: "+", label: t("stats_clients") },
+                  { target: 7, suffix: "+", label: t("stats_years") },
+                  { target: 9, suffix: "", label: t("stats_services") },
+                  { target: 10, suffix: "+", label: t("stats_experts") },
+                ].map((stat) => (
+                  <div key={stat.label}>
+                    <AnimatedCounter
+                      target={stat.target}
+                      suffix={stat.suffix}
+                      isVisible={statsInView}
+                      duration={2000}
+                      className="text-3xl sm:text-4xl font-bold text-yellow-500"
                     />
-                  </Link>
-                </TiltCard>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Latest News — Featured Layout with scroll reveal */}
-      <section className="py-20 sm:py-24">
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={inViewOnce}
-          variants={fadeUp}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">{t("news_title")}</h2>
-              <p className="mt-3 text-gray-500 text-lg">{t("news_subtitle")}</p>
-            </div>
-            <Link
-              href="/news"
-              className="hidden sm:inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors text-base"
-            >
-              {t("news_more")}
-              <ArrowRight className="ml-2" size={18} />
-            </Link>
-          </div>
-
-          {newsItems.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">{nt("no_news")}</div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              {/* Featured (first article) */}
-              {newsItems[0] &&
-                (() => {
-                  const item = newsItems[0];
-                  const title =
-                    (item as unknown as Record<string, string>)[`title_${locale}`] || item.title_vi;
-                  const excerpt =
-                    (item as unknown as Record<string, string>)[`excerpt_${locale}`] ||
-                    item.excerpt_vi;
-                  const categoryLabel = CATEGORY_LABELS[locale]?.[item.category] || item.category;
-                  return (
-                    <Link
-                      href={`/news/${item.slug || item.id}` as "/news"}
-                      className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover:border-yellow-300"
-                    >
-                      {item.cover_image && (
-                        <div className="relative h-56 overflow-hidden">
-                          <Image
-                            src={item.cover_image}
-                            alt={title}
-                            fill
-                            sizes="(max-width: 1024px) 100vw, 60vw"
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            priority
-                          />
-                        </div>
-                      )}
-                      <div className="p-7">
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-500 text-black">
-                            {categoryLabel}
-                          </span>
-                          <span className="text-gray-400 text-sm">
-                            {new Date(item.created_at).toLocaleDateString(
-                              locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN",
-                              { day: "numeric", month: "long", year: "numeric" }
-                            )}
-                          </span>
-                        </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-tight">
-                          {title}
-                        </h3>
-                        <p className="text-gray-500 line-clamp-3 mb-4 leading-relaxed">{excerpt}</p>
-                        <span className="inline-flex items-center text-yellow-600 font-semibold group-hover:text-yellow-500 transition-colors">
-                          {nt("read_more")}
-                          <ArrowRight
-                            className="ml-2 group-hover:translate-x-1 transition-transform"
-                            size={16}
-                          />
-                        </span>
-                      </div>
-                    </Link>
-                  );
-                })()}
-
-              {/* Side list (2nd-4th articles) */}
-              <div className="lg:col-span-2 flex flex-col gap-4">
-                {newsItems.slice(1, 4).map((item) => {
-                  const title =
-                    (item as unknown as Record<string, string>)[`title_${locale}`] || item.title_vi;
-                  const categoryLabel = CATEGORY_LABELS[locale]?.[item.category] || item.category;
-                  return (
-                    <Link
-                      key={item.id}
-                      href={`/news/${item.slug || item.id}` as "/news"}
-                      className="flex-1 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group hover:border-yellow-300"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800">
-                          {categoryLabel}
-                        </span>
-                        <span className="text-gray-400 text-xs">
-                          {new Date(item.created_at).toLocaleDateString(
-                            locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN",
-                            { day: "numeric", month: "short" }
-                          )}
-                        </span>
-                      </div>
-                      <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-snug">
-                        {title}
-                      </h4>
-                    </Link>
-                  );
-                })}
+                    <div className="mt-2 text-gray-600 text-sm sm:text-base">{stat.label}</div>
+                  </div>
+                ))}
               </div>
-            </div>
-          )}
+            </motion.div>
+          </section>
 
-          {/* Mobile: show "Xem tất cả" */}
-          <div className="text-center mt-8 sm:hidden">
-            <Link
-              href="/news"
-              className="inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors"
+          {/* Featured Services — Framer Motion stagger + spring hover */}
+          <section className="py-20 sm:py-24">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={inViewOnce}
+                variants={stagger}
+                className="grid lg:grid-cols-2 gap-10 items-center mb-16"
+              >
+                <motion.div variants={fadeUp}>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    {t("featured_title")}
+                  </h2>
+                  <p className="mt-4 text-gray-600 text-lg">{t("featured_subtitle")}</p>
+                </motion.div>
+                <motion.div variants={fadeUp} className="flex justify-center lg:justify-end">
+                  <Image
+                    src="/illustrations/services.svg"
+                    alt=""
+                    width={520}
+                    height={400}
+                    className="h-auto w-full max-w-md"
+                    unoptimized
+                  />
+                </motion.div>
+              </motion.div>
+              <motion.div
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-80px" }}
+                variants={stagger}
+                className="grid grid-cols-1 md:grid-cols-3 gap-8"
+              >
+                {featuredServices.map(({ icon: Icon, titleKey, descKey }) => (
+                  <motion.div key={titleKey} variants={fadeUp} style={{ perspective: 900 }}>
+                    <TiltCard className="h-full bg-white border border-gray-200 rounded-xl p-8 hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/5 group">
+                      <div className="w-14 h-14 bg-yellow-500/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-500/20 transition-colors">
+                        <Icon size={28} className="text-yellow-600" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">{st(titleKey)}</h3>
+                      <p className="text-gray-600 mb-4">{st(descKey)}</p>
+                      <Link
+                        href="/services"
+                        className="inline-flex items-center text-yellow-600 font-medium hover:text-yellow-500 transition-colors"
+                      >
+                        {common("learn_more")}
+                        <ArrowRight
+                          className="ml-1 group-hover:translate-x-1 transition-transform"
+                          size={16}
+                        />
+                      </Link>
+                    </TiltCard>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+          </section>
+
+          {/* Latest News — Featured Layout with scroll reveal */}
+          <section className="py-20 sm:py-24">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={inViewOnce}
+              variants={fadeUp}
+              className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
-              {t("news_more")}
-              <ArrowRight className="ml-2" size={18} />
-            </Link>
-          </div>
-        </motion.div>
-      </section>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-12">
+                <div>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    {t("news_title")}
+                  </h2>
+                  <p className="mt-3 text-gray-500 text-lg">{t("news_subtitle")}</p>
+                  <Link
+                    href="/news"
+                    className="mt-4 hidden sm:inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors text-base"
+                  >
+                    {t("news_more")}
+                    <ArrowRight className="ml-2" size={18} />
+                  </Link>
+                </div>
+                <Image
+                  src="/illustrations/news.svg"
+                  alt=""
+                  width={300}
+                  height={240}
+                  className="hidden lg:block h-auto w-52 flex-shrink-0"
+                  unoptimized
+                />
+              </div>
+
+              {newsItems.length === 0 ? (
+                <div className="text-center text-gray-500 py-8">{nt("no_news")}</div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                  {/* Featured (first article) */}
+                  {newsItems[0] &&
+                    (() => {
+                      const item = newsItems[0];
+                      const title =
+                        (item as unknown as Record<string, string>)[`title_${locale}`] ||
+                        item.title_vi;
+                      const excerpt =
+                        (item as unknown as Record<string, string>)[`excerpt_${locale}`] ||
+                        item.excerpt_vi;
+                      const categoryLabel =
+                        CATEGORY_LABELS[locale]?.[item.category] || item.category;
+                      return (
+                        <Link
+                          href={`/news/${item.slug || item.id}` as "/news"}
+                          className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group hover:border-yellow-300"
+                        >
+                          {item.cover_image && (
+                            <div className="relative h-56 overflow-hidden">
+                              <Image
+                                src={item.cover_image}
+                                alt={title}
+                                fill
+                                sizes="(max-width: 1024px) 100vw, 60vw"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                priority
+                              />
+                            </div>
+                          )}
+                          <div className="p-7">
+                            <div className="flex items-center gap-3 mb-4">
+                              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-500 text-black">
+                                {categoryLabel}
+                              </span>
+                              <span className="text-gray-400 text-sm">
+                                {new Date(item.created_at).toLocaleDateString(
+                                  locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN",
+                                  { day: "numeric", month: "long", year: "numeric" }
+                                )}
+                              </span>
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-tight">
+                              {title}
+                            </h3>
+                            <p className="text-gray-500 line-clamp-3 mb-4 leading-relaxed">
+                              {excerpt}
+                            </p>
+                            <span className="inline-flex items-center text-yellow-600 font-semibold group-hover:text-yellow-500 transition-colors">
+                              {nt("read_more")}
+                              <ArrowRight
+                                className="ml-2 group-hover:translate-x-1 transition-transform"
+                                size={16}
+                              />
+                            </span>
+                          </div>
+                        </Link>
+                      );
+                    })()}
+
+                  {/* Side list (2nd-4th articles) */}
+                  <div className="lg:col-span-2 flex flex-col gap-4">
+                    {newsItems.slice(1, 4).map((item) => {
+                      const title =
+                        (item as unknown as Record<string, string>)[`title_${locale}`] ||
+                        item.title_vi;
+                      const categoryLabel =
+                        CATEGORY_LABELS[locale]?.[item.category] || item.category;
+                      return (
+                        <Link
+                          key={item.id}
+                          href={`/news/${item.slug || item.id}` as "/news"}
+                          className="flex-1 bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group hover:border-yellow-300"
+                        >
+                          <div className="flex items-center gap-3 mb-3">
+                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800">
+                              {categoryLabel}
+                            </span>
+                            <span className="text-gray-400 text-xs">
+                              {new Date(item.created_at).toLocaleDateString(
+                                locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "vi-VN",
+                                { day: "numeric", month: "short" }
+                              )}
+                            </span>
+                          </div>
+                          <h4 className="font-bold text-gray-900 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-snug">
+                            {title}
+                          </h4>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Mobile: show "Xem tất cả" */}
+              <div className="text-center mt-8 sm:hidden">
+                <Link
+                  href="/news"
+                  className="inline-flex items-center text-yellow-600 font-semibold hover:text-yellow-500 transition-colors"
+                >
+                  {t("news_more")}
+                  <ArrowRight className="ml-2" size={18} />
+                </Link>
+              </div>
+            </motion.div>
+          </section>
+        </div>
+      </div>
 
       {/* Why Choose Lixin — Orbit Animation */}
-      <section className="py-20 sm:py-24 bg-gray-950 text-white overflow-hidden">
+      <section className="relative py-20 sm:py-24 bg-gray-950 text-white overflow-hidden">
+        <GridPattern variant="dots" className="absolute inset-0 text-yellow-500/10" />
         <motion.div
           initial="hidden"
           whileInView="show"
           viewport={inViewOnce}
           variants={fadeUp}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -390,13 +438,15 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
       </section>
 
       {/* CTA — with scroll reveal + pulse button */}
-      <section className="bg-yellow-500 py-16 sm:py-20">
+      <section className="relative overflow-hidden bg-yellow-500 py-16 sm:py-20">
+        <GridPattern variant="grid" className="absolute inset-0 text-black/[0.07]" />
+        <LineArtChart className="absolute right-10 top-1/2 hidden h-28 w-48 -translate-y-1/2 text-black/15 lg:block" />
         <motion.div
           initial="hidden"
           whileInView="show"
           viewport={inViewOnce}
           variants={fadeUp}
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+          className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
         >
           <h2 className="text-3xl sm:text-4xl font-bold text-black">{t("cta_title")}</h2>
           <p className="mt-4 text-black/70 text-lg max-w-2xl mx-auto">{t("cta_subtitle")}</p>

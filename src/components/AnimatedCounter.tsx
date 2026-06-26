@@ -9,15 +9,16 @@ interface AnimatedCounterProps {
   suffix?: string;
   /** Duration in ms */
   duration?: number;
-  /** Whether to start counting */
-  isVisible: boolean;
+  /** Optional override: start immediately when true. If omitted, the counter
+   *  self-detects when it scrolls into view. */
+  isVisible?: boolean;
   className?: string;
 }
 
 /**
- * Animated counting component.
- * Counts from 0 to target when isVisible becomes true.
- * Uses easeOutExpo for a satisfying deceleration effect.
+ * Counts from 0 to target the first time it enters the viewport (or when
+ * `isVisible` is forced true). easeOutCubic for a smooth, visible climb.
+ * Self-contained via IntersectionObserver — no parent wiring required.
  */
 export default function AnimatedCounter({
   target,
@@ -27,41 +28,53 @@ export default function AnimatedCounter({
   className = "",
 }: AnimatedCounterProps) {
   const [count, setCount] = useState(0);
-  const hasAnimated = useRef(false);
+  const ref = useRef<HTMLSpanElement>(null);
+  const started = useRef(false);
 
   useEffect(() => {
-    if (!isVisible || hasAnimated.current) return;
-    hasAnimated.current = true;
+    const el = ref.current;
+    if (!el) return;
 
-    // Respect prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) {
-      queueMicrotask(() => setCount(target));
+    const run = () => {
+      if (started.current) return;
+      started.current = true;
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        setCount(target);
+        return;
+      }
+
+      const startTime = performance.now();
+      const tick = (now: number) => {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        setCount(Math.round(eased * target));
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    // Forced-visible override (e.g. element already in view on load).
+    if (isVisible) {
+      run();
       return;
     }
 
-    const startTime = performance.now();
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // easeOutExpo curve — fast start, smooth deceleration
-      const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-      const currentValue = Math.round(eased * target);
-
-      setCount(currentValue);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-
-    requestAnimationFrame(animate);
-  }, [isVisible, target, duration]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          run();
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target, duration, isVisible]);
 
   return (
-    <span className={className}>
+    <span ref={ref} className={className}>
       {count}
       {suffix}
     </span>

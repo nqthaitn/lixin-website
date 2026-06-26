@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 400" fill="none" role="img" aria-label="Dịch vụ tư vấn tài chính">
+  <defs>
+    <style>
+      .s { stroke: #ca8a04; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .f { fill: #fde68a; }
+      .fy { fill: #eab308; }
+      .fw { fill: #fffbeb; }
+    </style>
+  </defs>
+
+  <!-- soft backdrop -->
+  <ellipse cx="260" cy="350" rx="200" ry="20" fill="#fef3c7"/>
+
+  <!-- dashboard panel -->
+  <rect x="60" y="70" width="280" height="190" rx="14" class="fw"/>
+  <rect x="60" y="70" width="280" height="190" rx="14" class="s"/>
+  <line x1="60" y1="104" x2="340" y2="104" class="s"/>
+  <circle cx="80" cy="87" r="4" class="fy"/>
+  <circle cx="94" cy="87" r="4" class="f"/>
+
+  <!-- bars -->
+  <rect x="86" y="180" width="26" height="50" rx="4" class="f"/>
+  <rect x="86" y="180" width="26" height="50" rx="4" class="s"/>
+  <rect x="124" y="150" width="26" height="80" rx="4" class="f"/>
+  <rect x="124" y="150" width="26" height="80" rx="4" class="s"/>
+  <rect x="162" y="195" width="26" height="35" rx="4" class="f"/>
+  <rect x="162" y="195" width="26" height="35" rx="4" class="s"/>
+
+  <!-- growth line -->
+  <path d="M210 210 L246 180 L282 192 L318 138" class="s"/>
+  <circle cx="210" cy="210" r="5" class="fy"/>
+  <circle cx="246" cy="180" r="5" class="fy"/>
+  <circle cx="282" cy="192" r="5" class="fy"/>
+  <circle cx="318" cy="138" r="5" class="fy"/>
+
+  <!-- floating coins -->
+  <g transform="translate(360 150)">
+    <ellipse cx="50" cy="14" rx="34" ry="15" class="fw"/>
+    <ellipse cx="50" cy="14" rx="34" ry="15" class="s"/>
+    <path d="M16 14 v22 c0 8.3 15.2 15 34 15 s34-6.7 34-15 V14" class="s"/>
+    <text x="50" y="20" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#ca8a04" text-anchor="middle">₫</text>
+  </g>
+
+  <!-- document -->
+  <g transform="translate(372 248)">
+    <path d="M0 8 h54 l20 20 v76 a4 4 0 0 1-4 4 H0 a4 4 0 0 1-4-4 V12 a4 4 0 0 1 4-4 Z" class="fw"/>
+    <path d="M0 8 h54 l20 20 v76 a4 4 0 0 1-4 4 H0 a4 4 0 0 1-4-4 V12 a4 4 0 0 1 4-4 Z" class="s"/>
+    <path d="M54 8 v20 h20" class="s"/>
+    <path d="M12 50 h44 M12 66 h44 M12 82 h28" class="s"/>
+  </g>
+</svg>

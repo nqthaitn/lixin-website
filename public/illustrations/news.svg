@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" fill="none" role="img" aria-label="Tin tức">
+  <defs>
+    <style>
+      .s { stroke: #ca8a04; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .f { fill: #fde68a; }
+      .fy { fill: #eab308; }
+      .fw { fill: #fffbeb; }
+    </style>
+  </defs>
+
+  <ellipse cx="160" cy="214" rx="120" ry="14" fill="#fef3c7"/>
+
+  <!-- back page -->
+  <rect x="78" y="48" width="150" height="170" rx="8" class="fw" transform="rotate(6 153 133)"/>
+  <rect x="78" y="48" width="150" height="170" rx="8" class="s" transform="rotate(6 153 133)"/>
+
+  <!-- front page -->
+  <rect x="64" y="40" width="160" height="172" rx="8" class="fw"/>
+  <rect x="64" y="40" width="160" height="172" rx="8" class="s"/>
+
+  <!-- masthead -->
+  <path d="M80 64 h128" class="s"/>
+  <rect x="80" y="74" width="60" height="12" rx="2" class="f"/>
+  <path d="M150 78 h58 M80 96 h128" class="s"/>
+
+  <!-- photo box -->
+  <rect x="80" y="108" width="58" height="44" rx="4" class="f"/>
+  <rect x="80" y="108" width="58" height="44" rx="4" class="s"/>
+  <path d="M88 144 l10-12 8 8 8-10 10 14" class="s"/>
+  <circle cx="124" cy="120" r="5" class="fy"/>
+
+  <!-- columns -->
+  <path d="M150 112 h58 M150 124 h58 M150 136 h44" class="s"/>
+  <path d="M80 168 h128 M80 182 h128 M80 196 h84" class="s"/>
+
+  <!-- floating bell / new badge -->
+  <circle cx="244" cy="58" r="20" class="fy"/>
+  <path d="M244 50 a7 7 0 0 0-7 7 c0 6-3 8-3 8 h20 s-3-2-3-8 a7 7 0 0 0-7-7Z M241 73 a3 3 0 0 0 6 0" fill="none" stroke="#fffbeb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
