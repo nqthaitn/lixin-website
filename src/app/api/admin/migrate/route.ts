@@ -63,6 +63,10 @@ export async function POST(request: Request) {
         { key: "contact_notify_email", value: "lixinvn.co.ltd@gmail.com" },
         { key: "email_notifications", value: "true" },
         { key: "auto_publish_news", value: "false" },
+        { key: "stat_clients", value: "200+" },
+        { key: "stat_years", value: "7+" },
+        { key: "stat_services", value: "9" },
+        { key: "stat_experts", value: "29+" },
       ];
       const { error: upsertError } = await supabase
         .from("site_settings")

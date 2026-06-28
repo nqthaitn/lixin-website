@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import HomePageClient from "@/components/HomePageClient";
 import { getLatestNews } from "@/lib/news";
+import { getHomeStats } from "@/lib/settings";
 
 // ISR: pre-render the page and refresh at most every 5 min. Admin publish also
 // flushes it instantly via revalidateTag("news").
@@ -12,7 +13,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   // Server-side, cached fetch — news is in the initial HTML (no client waterfall,
   // no layout shift). Shared across visitors via unstable_cache (tag: "news").
-  const newsItems = await getLatestNews(4);
+  const [newsItems, stats] = await Promise.all([getLatestNews(4), getHomeStats()]);
 
-  return <HomePageClient newsItems={newsItems} />;
+  return <HomePageClient newsItems={newsItems} stats={stats} />;
 }

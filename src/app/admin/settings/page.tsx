@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Settings,
   RefreshCw,
+  BarChart3,
 } from "lucide-react";
 
 interface SiteSettings {
@@ -19,6 +20,10 @@ interface SiteSettings {
   contact_notify_email: string;
   email_notifications: string;
   auto_publish_news: string;
+  stat_clients: string;
+  stat_years: string;
+  stat_services: string;
+  stat_experts: string;
 }
 
 const DEFAULT_SETTINGS: SiteSettings = {
@@ -27,7 +32,19 @@ const DEFAULT_SETTINGS: SiteSettings = {
   contact_notify_email: "lixinvn.co.ltd@gmail.com",
   email_notifications: "true",
   auto_publish_news: "false",
+  stat_clients: "200+",
+  stat_years: "7+",
+  stat_services: "9",
+  stat_experts: "29+",
 };
+
+// 4 chỉ số hiển thị dưới hero trang chủ. Nhập "29+" hoặc "9" — dấu "+" tuỳ ý.
+const HOME_STAT_FIELDS: { key: keyof SiteSettings; label: string }[] = [
+  { key: "stat_clients", label: "Khách hàng" },
+  { key: "stat_years", label: "Năm kinh nghiệm" },
+  { key: "stat_services", label: "Dịch vụ" },
+  { key: "stat_experts", label: "Chuyên gia" },
+];
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
@@ -249,6 +266,38 @@ export default function SettingsPage() {
                 Email này sẽ nhận tất cả thông báo khi có liên hệ mới từ website
               </p>
             </div>
+          </div>
+        </div>
+
+        {/* Section: Số liệu trang chủ */}
+        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center gap-3">
+            <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <BarChart3 size={16} className="text-yellow-600" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-gray-900 text-sm">Số liệu trang chủ</h2>
+              <p className="text-xs text-gray-500">
+                4 con số đếm động hiển thị dưới banner. Nhập kèm dấu, ví dụ: 29+
+              </p>
+            </div>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {HOME_STAT_FIELDS.map((field) => (
+              <div key={field.key}>
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                  {field.label}
+                </label>
+                <input
+                  type="text"
+                  value={settings[field.key]}
+                  onChange={(e) => set(field.key, e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  placeholder="VD: 29+"
+                />
+              </div>
+            ))}
           </div>
         </div>
 

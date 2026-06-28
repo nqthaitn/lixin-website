@@ -20,7 +20,28 @@ const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   zh: { general: "税务", accounting: "会计", legal: "法律" },
 };
 
-export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
+// Hero stats — số liệu lấy từ DB (site_settings, key `statKey`), nhãn từ i18n
+// (`labelKey` → messages/*/home.json). Đổi số ở trang Admin → Cài đặt.
+const HOME_STATS: { statKey: string; labelKey: string }[] = [
+  { statKey: "stat_clients", labelKey: "stats_clients" },
+  { statKey: "stat_years", labelKey: "stats_years" },
+  { statKey: "stat_services", labelKey: "stats_services" },
+  { statKey: "stat_experts", labelKey: "stats_experts" },
+];
+
+// "29+" -> { target: 29, suffix: "+" }; "9" -> { target: 9, suffix: "" }
+function parseStat(value: string | undefined): { target: number; suffix: string } {
+  const m = (value ?? "").match(/^(\d+)(.*)$/);
+  return m ? { target: parseInt(m[1], 10), suffix: m[2].trim() } : { target: 0, suffix: "" };
+}
+
+export default function HomePageClient({
+  newsItems,
+  stats,
+}: {
+  newsItems: News[];
+  stats?: Record<string, string>;
+}) {
   const t = useTranslations("home");
   const st = useTranslations("services");
   const nt = useTranslations("news");
@@ -151,23 +172,23 @@ export default function HomePageClient({ newsItems }: { newsItems: News[] }) {
               className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
             >
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-                {[
-                  { target: 200, suffix: "+", label: t("stats_clients") },
-                  { target: 7, suffix: "+", label: t("stats_years") },
-                  { target: 9, suffix: "", label: t("stats_services") },
-                  { target: 10, suffix: "+", label: t("stats_experts") },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <AnimatedCounter
-                      target={stat.target}
-                      suffix={stat.suffix}
-                      isVisible={statsInView}
-                      duration={2000}
-                      className="text-3xl sm:text-4xl font-bold text-yellow-500"
-                    />
-                    <div className="mt-2 text-gray-600 text-sm sm:text-base">{stat.label}</div>
-                  </div>
-                ))}
+                {HOME_STATS.map((stat) => {
+                  const { target, suffix } = parseStat(stats?.[stat.statKey]);
+                  return (
+                    <div key={stat.statKey}>
+                      <AnimatedCounter
+                        target={target}
+                        suffix={suffix}
+                        isVisible={statsInView}
+                        duration={2000}
+                        className="text-3xl sm:text-4xl font-bold text-yellow-500"
+                      />
+                      <div className="mt-2 text-gray-600 text-sm sm:text-base">
+                        {t(stat.labelKey)}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </motion.div>
           </section>
