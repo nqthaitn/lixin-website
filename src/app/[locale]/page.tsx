@@ -155,7 +155,7 @@ export default function HomePage() {
               { value: "200+", label: t("stats_clients") },
               { value: "7+", label: t("stats_years") },
               { value: "9", label: t("stats_services") },
-              { value: "10+", label: t("stats_experts") },
+              { value: "20+", label: t("stats_experts") },
             ].map((stat) => (
               <div key={stat.label}>
                 <div className="text-3xl sm:text-4xl font-bold text-yellow-500">{stat.value}</div>
