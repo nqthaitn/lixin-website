@@ -32,6 +32,7 @@ export async function generateStaticParams() {
 import { ArrowLeft, Calendar, Tag, Eye, Clock, ExternalLink, ArrowRight } from "lucide-react";
 import ShareButtons from "@/components/news/ShareButtons";
 import ReadingProgress from "@/components/news/ReadingProgress";
+import ReadTracker from "@/components/news/ReadTracker";
 
 const CATEGORY_LABELS: Record<string, Record<string, string>> = {
   vi: {
@@ -170,6 +171,7 @@ export default async function NewsDetailPage({
   return (
     <div className="pt-16 pb-20">
       <ReadingProgress />
+      <ReadTracker id={news.id} />
 
       <script
         type="application/ld+json"

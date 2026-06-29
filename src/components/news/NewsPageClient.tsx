@@ -5,9 +5,23 @@ import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { News } from "@/types/news";
-import { ArrowRight, Clock, Newspaper, Loader2, ChevronDown, Eye, TrendingUp } from "lucide-react";
+import {
+  ArrowRight,
+  Clock,
+  Newspaper,
+  Loader2,
+  ChevronDown,
+  Eye,
+  TrendingUp,
+  Scale,
+  Calculator,
+  Building2,
+  Receipt,
+  Check,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { fadeUp, inViewOnce } from "@/lib/motion";
+import { getReadIds } from "@/lib/readState";
 
 // Link with motion props (entrance reveal + spring hover lift) for news cards.
 const MotionLink = motion.create(Link);
@@ -62,6 +76,109 @@ function estimateReadTime(content: string) {
   return Math.max(1, Math.ceil(words / 200));
 }
 
+// Supabase storage host whitelisted in next.config — only these URLs go through
+// next/image. Anything else (images embedded in aggregated articles) renders via
+// a plain <img> so we don't have to allow arbitrary remote hosts.
+const SUPABASE_HOST = "cncdirblgyvseazxndvj.supabase.co";
+
+// Branded fallback icon per category — shown when an article has no usable image.
+const CATEGORY_ICONS: Record<string, typeof Newspaper> = {
+  general: Receipt,
+  tax: Receipt,
+  accounting: Calculator,
+  legal: Scale,
+  business: Building2,
+  other: Newspaper,
+};
+
+// First <img> embedded in the article body — cover fallback when the editor
+// didn't set an explicit cover_image.
+function firstContentImage(item: News, locale: string): string | null {
+  const html = getField(item, "content", locale) || "";
+  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return m ? m[1] : null;
+}
+
+// Resolve a card image: explicit cover → first inline image → none (placeholder).
+function resolveCover(item: News, locale: string): { src: string | null; optimized: boolean } {
+  if (item.cover_image) return { src: item.cover_image, optimized: true };
+  const inline = firstContentImage(item, locale);
+  if (inline) return { src: inline, optimized: inline.includes(SUPABASE_HOST) };
+  return { src: null, optimized: false };
+}
+
+// Cover slot for a news card. Always renders something the same size: the real
+// image when one exists, otherwise an on-brand (black + gold) category tile so
+// the grid never has empty gaps.
+function NewsCover({
+  item,
+  locale,
+  className,
+  sizes,
+  priority,
+}: {
+  item: News;
+  locale: string;
+  className: string;
+  sizes: string;
+  priority?: boolean;
+}) {
+  const { src, optimized } = resolveCover(item, locale);
+  const alt = getField(item, "title", locale);
+
+  if (!src) {
+    const Icon = CATEGORY_ICONS[item.category] || Newspaper;
+    return (
+      <div
+        className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 to-gray-950 ${className}`}
+      >
+        <div className="absolute -top-6 left-1/4 h-40 w-40 rounded-full bg-yellow-500/15 blur-2xl" />
+        <Icon size={44} strokeWidth={1.5} className="relative text-yellow-500/80" />
+      </div>
+    );
+  }
+
+  if (!optimized) {
+    return (
+      <div className={`relative overflow-hidden ${className}`}>
+        {/* External (aggregated) image — bypass next/image to avoid host whitelisting. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={alt}
+          loading={priority ? "eager" : "lazy"}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+        priority={priority}
+      />
+    </div>
+  );
+}
+
+const READ_LABEL: Record<string, string> = { vi: "Đã đọc", en: "Read", zh: "已读" };
+
+// Small "already read" pill shown on cards the visitor has opened before.
+function ReadBadge({ locale }: { locale: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+      <Check size={12} />
+      {READ_LABEL[locale] || READ_LABEL.vi}
+    </span>
+  );
+}
+
 interface NewsPageClientProps {
   initialNews: News[];
   totalCount: number;
@@ -97,6 +214,10 @@ export default function NewsPageClient({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(urlCategory);
   const [popularNews, setPopularNews] = useState<News[]>([]);
+  // Read state for anonymous visitors (localStorage). Empty on the server and on
+  // first client render so SSR markup matches; filled after mount to avoid a
+  // hydration mismatch, then refreshed whenever the visible list changes.
+  const [readIds, setReadIds] = useState<Set<number>>(new Set());
   const loaderRef = useRef<HTMLDivElement>(null);
 
   const categories = ["all", ...new Set(initialNews.map((n) => n.category))];
@@ -108,6 +229,12 @@ export default function NewsPageClient({
       .then((data) => setPopularNews(data.data || []))
       .catch(() => {});
   }, []);
+
+  // Sync "already read" markers from localStorage. Re-runs when the list changes
+  // (filter / load-more) and when returning from an article (component remount).
+  useEffect(() => {
+    setReadIds(getReadIds());
+  }, [news]);
 
   // Resolve the list from the URL (search query / category). When the URL has no
   // filter we keep the server-rendered default list (no extra fetch).
@@ -304,23 +431,20 @@ export default function NewsPageClient({
                       href={`/news/${highlightNews.slug || highlightNews.id}` as "/news"}
                       className="block mb-8 group"
                     >
-                      <article className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-yellow-300">
+                      <article
+                        className={`bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-yellow-300 ${
+                          readIds.has(highlightNews.id) ? "opacity-65 hover:opacity-100" : ""
+                        }`}
+                      >
                         <div className="grid grid-cols-1 lg:grid-cols-5">
-                          {highlightNews.cover_image && (
-                            <div className="relative lg:col-span-2 h-56 lg:h-auto min-h-56 overflow-hidden">
-                              <Image
-                                src={highlightNews.cover_image}
-                                alt={getField(highlightNews, "title", locale)}
-                                fill
-                                sizes="(max-width: 1024px) 100vw, 40vw"
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                priority
-                              />
-                            </div>
-                          )}
-                          <div
-                            className={`p-8 lg:p-10 flex flex-col justify-center ${highlightNews.cover_image ? "lg:col-span-3" : "lg:col-span-5"}`}
-                          >
+                          <NewsCover
+                            item={highlightNews}
+                            locale={locale}
+                            priority
+                            sizes="(max-width: 1024px) 100vw, 40vw"
+                            className="lg:col-span-2 h-56 lg:h-auto min-h-56"
+                          />
+                          <div className="p-8 lg:p-10 flex flex-col justify-center lg:col-span-3">
                             <div className="flex items-center gap-3 mb-4">
                               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-500 text-black">
                                 {CATEGORY_LABELS[locale]?.[highlightNews.category] ||
@@ -337,6 +461,7 @@ export default function NewsPageClient({
                                 <Eye size={12} />
                                 {highlightNews.view_count || 0}
                               </span>
+                              {readIds.has(highlightNews.id) && <ReadBadge locale={locale} />}
                             </div>
                             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3 leading-tight group-hover:text-yellow-600 transition-colors">
                               {getField(highlightNews, "title", locale)}
@@ -376,18 +501,19 @@ export default function NewsPageClient({
                         transition={{ type: "spring", stiffness: 220, damping: 22 }}
                         className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg group hover:border-yellow-300"
                       >
-                        <article>
-                          {item.cover_image && (
-                            <div className="relative h-44 overflow-hidden">
-                              <Image
-                                src={item.cover_image}
-                                alt={getField(item, "title", locale)}
-                                fill
-                                sizes="(max-width: 768px) 100vw, 50vw"
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                              />
-                            </div>
-                          )}
+                        <article
+                          className={
+                            readIds.has(item.id)
+                              ? "opacity-65 transition-opacity group-hover:opacity-100"
+                              : ""
+                          }
+                        >
+                          <NewsCover
+                            item={item}
+                            locale={locale}
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="h-44"
+                          />
                           <div className="p-5">
                             <div className="flex items-center gap-3 mb-3">
                               <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800">
@@ -400,6 +526,7 @@ export default function NewsPageClient({
                                 <Clock size={12} />
                                 {formatDate(item.created_at, locale)}
                               </time>
+                              {readIds.has(item.id) && <ReadBadge locale={locale} />}
                             </div>
                             <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-yellow-600 transition-colors leading-snug">
                               {getField(item, "title", locale)}
