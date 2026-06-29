@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({
   children,
@@ -7,7 +8,11 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Privacy-friendly traffic stats (visits / uniques / top pages) — no cookies, no PII. */}
+        <Analytics />
+      </body>
     </html>
   );
 }
