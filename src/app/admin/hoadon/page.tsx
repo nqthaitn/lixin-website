@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+
+// Font hệ thống thiết kế (Stitch): Hanken Grotesk cho chữ, JetBrains Mono cho SỐ (tabular, canh cột).
+const sans = Hanken_Grotesk({ subsets: ["latin", "latin-ext", "vietnamese"], display: "swap" });
+const mono = JetBrains_Mono({ subsets: ["latin"], weight: ["500", "600", "700"], display: "swap" });
 
 type Line = { ten?: string; code?: string; qty?: number };
 type Invoice = { total?: number; lines?: Line[] };
@@ -72,158 +77,222 @@ export default function AdminHoaDonPage() {
   const dmy = date ? date.split("-").reverse().join("/") : "";
 
   return (
-    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">🧾 Hoá đơn nháp — các hộ</h1>
-        <div className="flex items-center gap-2 text-sm">
-          <select
-            value={date}
-            onChange={(e) => load(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-1.5 bg-white text-gray-700"
-          >
-            {dates.length === 0 && <option value="">{dmy || "—"}</option>}
-            {dates.map((d) => (
-              <option key={d} value={d}>
-                {d.split("-").reverse().join("/")}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={() => load(date || undefined)}
-            className="px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-gray-700 transition"
-          >
-            ↻ Làm mới
-          </button>
-        </div>
-      </div>
-      <p className="text-sm text-gray-500 mb-4">
-        Ngày {dmy || "—"} · cập nhật {updatedAt || "…"} · tự làm mới mỗi 2 phút
-      </p>
-
-      {/* Cảnh báo nháp chưa phát hành */}
-      <div className="rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm px-4 py-2.5 mb-5">
-        🖊️ Đây là hoá đơn <b>NHÁP — chưa phát hành</b> (chưa gửi CQT). Duyệt xong bấm phát hành/ký
-        số trên đúng nhà cung cấp của từng hộ.
-      </div>
-
-      {missingTable && (
-        <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3 mb-5">
-          Bảng <code className="font-mono">hoadon_nhap</code> chưa tồn tại. Chạy migration{" "}
-          <code className="font-mono">006_create_hoadon_nhap.sql</code> trong Supabase SQL Editor.
-        </div>
-      )}
-
-      {/* Tổng quan */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
-        {[
-          { v: rows.length, l: "hộ kinh doanh" },
-          { v: totalNhap, l: "nháp trong ngày" },
-          { v: `${f(totalRev)}đ`, l: "tổng doanh thu nháp" },
-        ].map((t, i) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="text-2xl sm:text-3xl font-bold text-gray-900 tabular-nums">{t.v}</div>
-            <div className="text-xs sm:text-sm text-gray-500">{t.l}</div>
+    <div className={`${sans.className} min-h-full bg-slate-50 p-4 sm:p-8`}>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-1">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              🧾 Hoá đơn nháp — các hộ
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Ngày {dmy || "—"} · cập nhật {updatedAt || "…"} · tự làm mới mỗi 2 phút
+            </p>
           </div>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="text-gray-500 py-10 text-center">Đang tải…</div>
-      ) : rows.length === 0 ? (
-        <div className="text-gray-500 py-10 text-center">Chưa có dữ liệu nháp cho ngày này.</div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {rows.map((r) => {
-            const prov = PROV[r.cong] || {
-              name: r.cong?.toUpperCase() || "?",
-              color: "#5b6b7b",
-              link: "#",
-            };
-            const pct = r.target_dt
-              ? Math.min(100, Math.round((r.doanh_thu / r.target_dt) * 100))
-              : 0;
-            return (
-              <section
-                key={r.hkd_id}
-                className="bg-white border border-gray-200 rounded-xl p-5 flex flex-col gap-3"
-                style={{ borderTop: `3px solid ${prov.color}` }}
-              >
-                <header className="flex items-center justify-between gap-2">
-                  <h2 className="font-semibold text-gray-900">{r.hkd_ten}</h2>
-                  <span
-                    className="text-xs font-semibold text-white px-2.5 py-1 rounded-full whitespace-nowrap"
-                    style={{ background: prov.color }}
-                  >
-                    {prov.name}
-                  </span>
-                </header>
-
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-gray-900 tabular-nums">
-                    {r.so_nhap}
-                    {r.target_hd != null && (
-                      <span className="text-lg text-gray-400 font-semibold">/{r.target_hd}</span>
-                    )}
-                  </span>
-                  <span className="text-sm text-gray-500">hoá đơn nháp</span>
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-sm tabular-nums">
-                    <span className="text-gray-800">{f(r.doanh_thu)}đ</span>
-                    {r.target_dt != null && (
-                      <span className="text-gray-400">mục tiêu {f(r.target_dt)}đ</span>
-                    )}
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden mt-1">
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${pct}%`, background: prov.color }}
-                    />
-                  </div>
-                </div>
-
-                {r.invoices?.length ? (
-                  <ul className="flex flex-col gap-2">
-                    {r.invoices.map((iv, i) => (
-                      <li key={i} className="border-t border-gray-100 pt-2 text-sm">
-                        <div className="flex justify-between">
-                          <b className="text-gray-700">#{i + 1}</b>
-                          <span className="font-bold text-gray-900 tabular-nums">
-                            {f(iv.total || 0)}đ
-                          </span>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-0.5">
-                          {(iv.lines || []).slice(0, 5).map((l, j) => (
-                            <span key={j}>
-                              {(l.ten || l.code || "").slice(0, 28)}{" "}
-                              <span className="text-gray-700 font-semibold">×{fq(l.qty || 0)}</span>
-                              {j < Math.min(4, (iv.lines || []).length - 1) ? ", " : ""}
-                            </span>
-                          ))}
-                          {(iv.lines || []).length > 5 ? " …" : ""}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="text-sm text-gray-400 italic">Chưa có nháp trong ngày</div>
-                )}
-
-                <a
-                  href={prov.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto text-sm font-semibold hover:underline"
-                  style={{ color: prov.color }}
-                >
-                  Mở {prov.name} để duyệt / phát hành →
-                </a>
-              </section>
-            );
-          })}
+          <div className="flex items-center gap-2 text-sm">
+            <select
+              value={date}
+              onChange={(e) => load(e.target.value)}
+              className={`${mono.className} border border-slate-300 rounded-lg px-3 py-2 bg-white text-slate-700 shadow-sm focus:border-[#0b5fa4] focus:outline-none focus:ring-2 focus:ring-[#0b5fa4]/20`}
+            >
+              {dates.length === 0 && <option value="">{dmy || "—"}</option>}
+              {dates.map((d) => (
+                <option key={d} value={d}>
+                  {d.split("-").reverse().join("/")}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => load(date || undefined)}
+              className="px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold hover:bg-slate-700 transition shadow-sm"
+            >
+              ↻ Làm mới
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Cảnh báo nháp chưa phát hành */}
+        <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm px-4 py-3 flex gap-2">
+          <span aria-hidden>🖊️</span>
+          <span>
+            Đây là hoá đơn <b>NHÁP — chưa phát hành</b> (chưa gửi cơ quan thuế). Duyệt xong bấm phát
+            hành / ký số trên đúng nhà cung cấp của từng hộ.
+          </span>
+        </div>
+
+        {missingTable && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3">
+            Bảng <code className={`${mono.className} font-semibold`}>hoadon_nhap</code> chưa tồn
+            tại. Chạy migration <code className={mono.className}>006_create_hoadon_nhap.sql</code>{" "}
+            trong Supabase SQL Editor.
+          </div>
+        )}
+
+        {/* KPI */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <KpiCard label="hộ kinh doanh" value={String(rows.length)} />
+          <KpiCard label="nháp trong ngày" value={String(totalNhap)} />
+          <KpiCard
+            label="tổng doanh thu nháp"
+            value={`${f(totalRev)}đ`}
+            accent="#0b5fa4"
+            mono={mono.className}
+          />
+        </div>
+
+        {/* Lưới thẻ hộ */}
+        {loading ? (
+          <div className="text-slate-400 py-16 text-center">Đang tải…</div>
+        ) : rows.length === 0 ? (
+          <div className="text-slate-400 py-16 text-center">Chưa có dữ liệu nháp cho ngày này.</div>
+        ) : (
+          <div className="grid gap-4 mt-6 sm:grid-cols-2 lg:grid-cols-3">
+            {rows.map((r) => {
+              const prov = PROV[r.cong] || {
+                name: r.cong?.toUpperCase() || "?",
+                color: "#64748b",
+                link: "#",
+              };
+              const pct = r.target_dt
+                ? Math.min(100, Math.round((r.doanh_thu / r.target_dt) * 100))
+                : 0;
+              return (
+                <section
+                  key={r.hkd_id}
+                  className="relative bg-white rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgba(15,23,42,0.05)] overflow-hidden flex flex-col"
+                >
+                  {/* Provider accent stripe */}
+                  <div className="h-1" style={{ background: prov.color }} />
+                  <div className="p-5 flex flex-col gap-3.5 flex-1">
+                    {/* Header: tên + số nháp lớn */}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h2 className="font-semibold text-slate-900 leading-snug truncate">
+                          {r.hkd_ten}
+                        </h2>
+                        <span
+                          className="inline-block mt-1.5 text-[11px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                          style={{ color: prov.color, background: `${prov.color}1a` }}
+                        >
+                          {prov.name}
+                        </span>
+                      </div>
+                      <div className={`${mono.className} text-right shrink-0`}>
+                        <div className="text-3xl font-bold text-slate-900 leading-none tabular-nums">
+                          {r.so_nhap}
+                          {r.target_hd != null && (
+                            <span className="text-lg text-slate-300 font-semibold">
+                              /{r.target_hd}
+                            </span>
+                          )}
+                        </div>
+                        <div className={`${sans.className} text-[11px] text-slate-400 mt-1`}>
+                          hoá đơn nháp
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Doanh thu + thanh tiến độ */}
+                    <div>
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span
+                          className={`${mono.className} text-base font-bold tabular-nums`}
+                          style={{ color: prov.color }}
+                        >
+                          {f(r.doanh_thu)}đ
+                        </span>
+                        {r.target_dt != null && (
+                          <span className={`${mono.className} text-xs text-slate-400 tabular-nums`}>
+                            / {f(r.target_dt)}đ
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className="h-2 mt-1.5 rounded-full overflow-hidden"
+                        style={{ background: `${prov.color}1a` }}
+                      >
+                        <div
+                          className="h-full rounded-full transition-all"
+                          style={{ width: `${pct}%`, background: prov.color }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Danh sách HĐ */}
+                    {r.invoices?.length ? (
+                      <ul className="flex flex-col gap-2 mt-0.5">
+                        {r.invoices.map((iv, i) => (
+                          <li key={i} className="border-t border-slate-100 pt-2 text-sm">
+                            <div className="flex justify-between items-baseline gap-2">
+                              <b className="text-slate-500 text-xs">HĐ #{i + 1}</b>
+                              <span
+                                className={`${mono.className} font-bold text-slate-900 tabular-nums`}
+                              >
+                                {f(iv.total || 0)}đ
+                              </span>
+                            </div>
+                            <div className="text-xs text-slate-500 mt-0.5 leading-relaxed">
+                              {(iv.lines || []).slice(0, 5).map((l, j) => (
+                                <span key={j}>
+                                  {(l.ten || l.code || "").slice(0, 28)}{" "}
+                                  <span
+                                    className={`${mono.className} text-slate-700 font-semibold`}
+                                  >
+                                    ×{fq(l.qty || 0)}
+                                  </span>
+                                  {j < Math.min(4, (iv.lines || []).length - 1) ? ", " : ""}
+                                </span>
+                              ))}
+                              {(iv.lines || []).length > 5 ? " …" : ""}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-sm text-slate-400 italic">Chưa có nháp trong ngày</div>
+                    )}
+
+                    {/* Link duyệt */}
+                    <a
+                      href={prov.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-auto pt-1 text-sm font-semibold hover:underline inline-flex items-center gap-1"
+                      style={{ color: prov.color }}
+                    >
+                      Mở {prov.name} để duyệt / phát hành →
+                    </a>
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function KpiCard({
+  label,
+  value,
+  accent,
+  mono,
+}: {
+  label: string;
+  value: string;
+  accent?: string;
+  mono?: string;
+}) {
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_20px_rgba(15,23,42,0.05)] px-5 py-4">
+      <div
+        className={`${mono || ""} text-3xl font-bold tabular-nums leading-none`}
+        style={{ color: accent || "#0f172a" }}
+      >
+        {value}
+      </div>
+      <div className="text-[13px] text-slate-500 mt-1.5">{label}</div>
     </div>
   );
 }
